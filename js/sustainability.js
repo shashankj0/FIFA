@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * ArenaMind 2026 - Sustainability Hub Module
  * Calculates travel emissions, concessional offsets, and updates fan footprint indicators.
@@ -99,3 +101,6 @@ function calculateCarbonFootprint() {
 
   return totalCO2.toFixed(2);
 }
+
+// Bind to window scope
+window.calculateCarbonFootprint = calculateCarbonFootprint;

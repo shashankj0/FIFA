@@ -4,6 +4,8 @@
  * and tactical incident response planner.
  */
 
+"use strict";
+
 /**
  * Updates operations dashboard metric fields and active incidents list.
  * @param {object} state The current live state of the StadiumSimulator.
@@ -42,7 +44,7 @@ function updateDashboardUI(state) {
     alertFeed.innerHTML = '';
     
     if (state.incidents.length === 0) {
-      alertFeed.innerHTML = `<div class="metric-subtext" style="text-align:center;">No active incidents registered. Nominal state.</div>`;
+      alertFeed.innerHTML = `<div class="metric-subtext text-center">No active incidents registered. Nominal state.</div>`;
     } else {
       state.incidents.forEach(inc => {
         const row = document.createElement('div');
@@ -58,12 +60,12 @@ function updateDashboardUI(state) {
         row.innerHTML = `
           <div>
             <span class="badge ${badgeClass}">${badgeLabel}</span>
-            <strong>${escapeHTML(inc.title)}</strong>: ${escapeHTML(inc.description)} <small class="metric-subtext" style="display:block; margin-top:2px;">Logged at: ${escapeHTML(inc.timestamp)}</small>
+            <strong>${escapeHTML(inc.title)}</strong>: ${escapeHTML(inc.description)} <small class="metric-subtext display-block mt-2">Logged at: ${escapeHTML(inc.timestamp)}</small>
           </div>
           <div>
             ${!inc.aiResolved 
               ? `<button class="btn btn-secondary" data-action="resolve-incident" data-incident-id="${escapeHTML(inc.id)}" data-target-area="${escapeHTML(inc.target)}">AI Resolve Plan</button>` 
-              : `<span class="text-primary-color" style="font-weight:700;">🟢 Dispatched</span>`
+              : `<span class="text-primary-color font-bold">🟢 Dispatched</span>`
             }
           </div>
         `;
@@ -163,3 +165,11 @@ function runSuiteTests() {
     });
   }
 }
+
+// Bind to window scope
+window.updateDashboardUI = updateDashboardUI;
+window.triggerMockIncident = triggerMockIncident;
+window.simulateIncidentResponse = simulateIncidentResponse;
+window.resetSimulatorData = resetSimulatorData;
+window.requestTacticalBriefing = requestTacticalBriefing;
+window.runSuiteTests = runSuiteTests;

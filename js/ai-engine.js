@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * ArenaMind 2026 - Generative AI Simulation Engine
  * Simulates Gemini LLM behavior with streaming output, multilingual translation,
@@ -221,4 +223,5 @@ Estimated time to relieve: **8 minutes** under current dispatch guidelines.`;
 }
 
 // Instantiate engine globally
+window.StadiumAIEngine = StadiumAIEngine;
 window.stadiumAIEngine = new StadiumAIEngine();

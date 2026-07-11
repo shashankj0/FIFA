@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * ArenaMind 2026 - Stadium Wayfinding Map Module
  * Coordinates active SVG node selections, maps coordinates, and plots Bezier curve routing guides.
@@ -101,3 +103,7 @@ function calculateRoute() {
 
   return { directions: routeDirections, eta: etaMinutes, distance: distanceFeet };
 }
+
+// Bind to window scope
+window.selectMapNode = selectMapNode;
+window.calculateRoute = calculateRoute;

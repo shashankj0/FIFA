@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * ArenaMind 2026 - DOM Element Reference Caching Module
  * Centralizes DOM lookups to minimize duplicate traversals and layout query overhead.
@@ -8,6 +10,7 @@
  * @type {Object<string, HTMLElement>}
  */
 let DOM = {};
+window.DOM = DOM;
 
 /**
  * Queries and caches DOM element references inside the global DOM object.
@@ -55,4 +58,7 @@ function populateDOMCache() {
     testCoveragePerformance: document.getElementById('test-coverage-performance'),
     testResultsBox: document.getElementById('test-results-box')
   };
+  window.DOM = DOM;
 }
+
+window.populateDOMCache = populateDOMCache;

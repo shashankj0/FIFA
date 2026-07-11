@@ -1,14 +1,16 @@
+"use strict";
+
 /**
  * ArenaMind 2026 - Main Application Orchestrator
  * Integrates visual portal switching, sidebar routing links, centralized event delegation,
  * and dependency validation audits.
  */
 
-// Global State Variables
-let currentPortalMode = 'fan'; // 'fan' or 'staff'
-let currentActiveTab = 'map';  // 'map', 'assistant', 'sustainability', 'tests'
-let isTextToSpeechActive = false;
-let currentFontSizePercent = 100;
+// Global State Variables on window
+window.currentPortalMode = 'fan'; // 'fan' or 'staff'
+window.currentActiveTab = 'map';  // 'map', 'assistant', 'sustainability', 'tests'
+window.isTextToSpeechActive = false;
+window.currentFontSizePercent = 100;
 
 /**
  * Escapes dynamic string values to mitigate DOM-based Cross-Site Scripting (XSS).
@@ -184,7 +186,7 @@ function bindEvents() {
  * @returns {void}
  */
 function switchPortalMode(mode) {
-  currentPortalMode = mode;
+  window.currentPortalMode = mode;
   
   if (mode === 'fan') {
     if (DOM.btnFan) DOM.btnFan.classList.add('active');
@@ -230,7 +232,7 @@ function updateSidebarNav(links) {
     const li = document.createElement('li');
     const button = document.createElement('button');
     button.id = `nav-btn-${link.id}`;
-    button.className = `nav-item-btn ${currentActiveTab === link.id ? 'active' : ''}`;
+    button.className = `nav-item-btn ${window.currentActiveTab === link.id ? 'active' : ''}`;
     button.setAttribute('data-tab', link.id);
     button.setAttribute('aria-label', link.label);
     button.textContent = link.text;
@@ -249,7 +251,7 @@ function updateSidebarNav(links) {
  * @returns {void}
  */
 function switchTab(tabId) {
-  currentActiveTab = tabId;
+  window.currentActiveTab = tabId;
   
   // Hide all sections
   const sections = document.querySelectorAll('.dashboard-section');
@@ -289,3 +291,8 @@ function checkModuleLoadState() {
     }
   }
 }
+// Bind orchestrator functions to window scope
+window.switchPortalMode = switchPortalMode;
+window.updateSidebarNav = updateSidebarNav;
+window.switchTab = switchTab;
+window.checkModuleLoadState = checkModuleLoadState;

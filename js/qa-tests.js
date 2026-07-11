@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * ArenaMind 2026 - Automated QA Testing & Audit Suite
  * Provides in-browser validation for unit tests, accessibility standards,
@@ -466,7 +468,7 @@ class QATestSuite {
     let allInputsLabeled = true;
     
     inputs.forEach(input => {
-      if (input.id && input.id !== 'chat-text-field' && input.id !== 'chat-lang-select') {
+      if (input.id) {
         const label = document.querySelector(`label[for="${input.id}"]`);
         if (!label) {
           allInputsLabeled = false;
@@ -782,4 +784,5 @@ class QATestSuite {
 }
 
 // Instantiate test suite globally
+window.QATestSuite = QATestSuite;
 window.qaTestSuite = new QATestSuite();

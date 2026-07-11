@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * ArenaMind 2026 - Accessibility Controller Module
  * Manages high-contrast visual filters, font scaling utilities, text-to-speech toggling,
@@ -34,13 +36,13 @@ function adjustTextScale(increase) {
   const html = document.documentElement;
   
   if (increase) {
-    currentFontSizePercent = Math.min(150, currentFontSizePercent + 10);
+    window.currentFontSizePercent = Math.min(150, (window.currentFontSizePercent || 100) + 10);
   } else {
-    currentFontSizePercent = Math.max(85, currentFontSizePercent - 10);
+    window.currentFontSizePercent = Math.max(85, (window.currentFontSizePercent || 100) - 10);
   }
   
-  html.style.fontSize = `${currentFontSizePercent}%`;
-  announceAccessibility(`Text size scaled to ${currentFontSizePercent} percent.`);
+  html.style.fontSize = `${window.currentFontSizePercent}%`;
+  announceAccessibility(`Text size scaled to ${window.currentFontSizePercent} percent.`);
 }
 
 /**
@@ -48,10 +50,10 @@ function adjustTextScale(increase) {
  * @returns {void}
  */
 function toggleTextToSpeech() {
-  isTextToSpeechActive = !isTextToSpeechActive;
+  window.isTextToSpeechActive = !window.isTextToSpeechActive;
   
   if (DOM.btnSpeech) {
-    if (isTextToSpeechActive) {
+    if (window.isTextToSpeechActive) {
       DOM.btnSpeech.textContent = '🔇 Text-to-Speech (On)';
       DOM.btnSpeech.classList.add('active');
       announceAccessibility("Text to speech navigation aids activated.");
@@ -78,7 +80,7 @@ function announceAccessibility(text) {
   }
   
   // Optional Text-To-Speech
-  if (isTextToSpeechActive && 'speechSynthesis' in window) {
+  if (window.isTextToSpeechActive && 'speechSynthesis' in window) {
     // Stop ongoing speech
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
@@ -86,3 +88,9 @@ function announceAccessibility(text) {
     window.speechSynthesis.speak(utterance);
   }
 }
+
+// Bind to window scope
+window.toggleHighContrast = toggleHighContrast;
+window.adjustTextScale = adjustTextScale;
+window.toggleTextToSpeech = toggleTextToSpeech;
+window.announceAccessibility = announceAccessibility;

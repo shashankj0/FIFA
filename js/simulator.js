@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * ArenaMind 2026 - Stadium Operations Simulation Engine
  * Manages the mock real-time state of MetLife Stadium for the live demo.
@@ -198,4 +200,5 @@ class StadiumSimulator {
 }
 
 // Instantiate simulator globally
+window.StadiumSimulator = StadiumSimulator;
 window.stadiumSimulator = new StadiumSimulator();

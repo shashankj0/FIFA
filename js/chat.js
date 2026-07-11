@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * ArenaMind 2026 - Multilingual GenAI Chatbot Module
  * Handles recommended prompt submissions, manual prompt processing, and language translation hooks.
@@ -79,3 +81,8 @@ function updateChatLanguage() {
   const noticeText = baseNotices[lang] || baseNotices['en'];
   window.stadiumAIEngine.streamText(noticeText, noticeBubble);
 }
+
+// Bind to window scope
+window.submitQuickPrompt = submitQuickPrompt;
+window.handleChatSubmit = handleChatSubmit;
+window.updateChatLanguage = updateChatLanguage;
