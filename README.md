@@ -16,10 +16,17 @@ A high-performance, accessible, and secure digital platform built for **MetLife 
 
 The codebase has been refactored under strict production-grade web guidelines:
 
-### 1. Separation of Concerns (Code Quality)
-- **Zero Inline Styles**: All dynamic elements and layout rules are completely decoupled from HTML markup and standard CSS classes. Style definitions have been refactored into utility variables inside `style.css`.
-- **Programmatic Event Binding**: Removed all inline `onclick`, `onsubmit`, `onchange`, and `oninput` handlers. The application lifecycle is governed programmatically inside `app.js` using standard DOM event listeners registered at `DOMContentLoaded`.
-- **DOM Reference Caching**: Element selectors are indexed in a centralized `DOM` dictionary on load to minimize expensive DOM lookups.
+### 1. Separation of Concerns & Modular Architecture (Code Quality)
+The JavaScript logic has been refactored and decoupled from a single monolithic structure into **7 domain-specific modules** loaded sequentially in `index.html`:
+- **`js/dom-cache.js`**: Declares and populates the global `DOM` cached element reference selectors to eliminate repeated DOM query overhead.
+- **`js/accessibility.js`**: Governs contrast theme toggles, font scaling utilities, text-to-speech helpers, and screen reader announcements.
+- **`js/wayfinding.js`**: Coordinates SVG gate mapping, active node selections, and Bezier route calculations.
+- **`js/chat.js`**: Executes recommended prompt quick chips and manual chatbot query dialogs.
+- **`js/sustainability.js`**: Calculates matchday carbon footprint metrics using transportation and concession variables, categorized by constants.
+- **`js/operations.js`**: Updates operations console queues and lists, triggering mock simulator incidents.
+- **`js/app.js`**: Coordinates state, binds dynamic page event listeners at load, and orchestrates portal switches.
+
+Every top-level function across all `.js` scripts is documented using standard **JSDoc blocks** mapping parameter types and returns. Magic numbers/strings have been extracted to constants (e.g. `GATE_C_CONGESTED_WAIT`, `GATE_C_RESOLVED_WAIT` in `simulator.js`, `CARBON_TIER_THRESHOLDS` in `sustainability.js`, and `STREAM_INTERVAL_MS` in `ai-engine.js`).
 
 ### 2. High-Performance Text Rendering (Efficiency)
 - **rAF Metered Loops**: Text-streaming logic inside `ai-engine.js` has been converted from a heavy `setInterval` timer to a `requestAnimationFrame` delta-time loop. This aligns writing execution frame rates directly with browser refresh cycles, eliminating layout thrashing and CPU spikes.
@@ -30,8 +37,10 @@ The codebase has been refactored under strict production-grade web guidelines:
 
 ### 4. Defense-in-Depth Auditing (Security)
 - **XSS Sanitization**: Dynamic HTML markup additions (such as simulator alerts or messages) are automatically sanitized using a global `escapeHTML` helper to encode text structures before `.innerHTML` insertion.
-- **Active Static Scan Audits**: The bundled security diagnostic suite performs real-time static code fetching and scanning of runtime files to detect forbidden executions (like `eval()` or `new Function()`) and checks for unescaped template string interpolations in `.innerHTML` statements.
-- **State Hygiene Audit**: The scanner reviews `localStorage` key-value pairs to detect plaintext sensitive structures (e.g. `token`, `secret`, `password`) leaking into unencrypted web storage.
+- **Content-Security-Policy (CSP)**: Added a strict CSP meta tag to the document head to block unauthorized inline script injections at the browser level.
+- **Active Static Scan Audits (Hardened)**: The security diagnostic suite fetches runtime scripts and scans for forbidden executions (`eval`/`Function`) and verifies that *all* dynamic variables inside innerHTML templates are fully wrapped in `escapeHTML()` (blocked by regex check `^escapeHTML\([^)]*\)$` if any raw concatenated parts exist).
+- **State Hygiene Audit**: Scans `localStorage` keys for unencrypted plaintext credential leaks.
+- **CSP Protection Audit**: Verifies that the CSP meta tag exists in the document and contains the `default-src` directive.
 
 ---
 

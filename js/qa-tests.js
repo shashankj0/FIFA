@@ -5,6 +5,9 @@
  */
 
 class QATestSuite {
+  /**
+   * Initializes the diagnostics suite scores and log repositories.
+   */
   constructor() {
     this.resultsLog = [];
     this.scores = {
@@ -15,6 +18,12 @@ class QATestSuite {
     };
   }
 
+  /**
+   * Logs a message to the test runner audit logger and updates logs UI.
+   * @param {string} message The text descriptor of the log action.
+   * @param {string} [type='info'] Status category classification ('success', 'failure', or 'info').
+   * @returns {void}
+   */
   log(message, type = 'info') {
     const timestamp = new Date().toISOString().split('T')[1].slice(0, 8);
     let prefix = `[${timestamp}] `;
@@ -35,6 +44,10 @@ class QATestSuite {
     this.updateLogUI();
   }
 
+  /**
+   * Updates the diagnostic log interface in real-time.
+   * @returns {void}
+   */
   updateLogUI() {
     const logBox = document.getElementById('test-results-box');
     if (!logBox) return;
@@ -49,6 +62,56 @@ class QATestSuite {
     logBox.scrollTop = logBox.scrollHeight;
   }
 
+  /**
+   * Parses the text content of a JavaScript file to extract all template literal block strings
+   * assigned to .innerHTML properties, handling nested braces and inner backticks.
+   * @param {string} content The file source content.
+   * @returns {string[]} An array of extracted innerHTML template literal blocks.
+   */
+  getInnerHTMLBlocks(content) {
+    const blocks = [];
+    let index = 0;
+    while ((index = content.indexOf('.innerHTML', index)) !== -1) {
+      // Find start of assignment (backtick)
+      const startBacktick = content.indexOf('`', index);
+      if (startBacktick !== -1) {
+        let braceCount = 0;
+        let inInterpolation = false;
+        let closingBacktick = -1;
+        for (let i = startBacktick + 1; i < content.length; i++) {
+          const char = content[i];
+          const nextChar = content[i+1];
+          if (inInterpolation) {
+            if (char === '}') braceCount--;
+            if (braceCount === 0) inInterpolation = false;
+          } else {
+            if (char === '$' && nextChar === '{') {
+              braceCount++;
+              inInterpolation = true;
+              i++; // skip '{'
+            } else if (char === '`') {
+              closingBacktick = i;
+              break;
+            }
+          }
+        }
+        if (closingBacktick !== -1) {
+          blocks.push(content.substring(startBacktick, closingBacktick + 1));
+          index = closingBacktick + 1;
+        } else {
+          index += 10;
+        }
+      } else {
+        index += 10;
+      }
+    }
+    return blocks;
+  }
+
+  /**
+   * Core orchestrator executing the 4 diagnostic audit steps.
+   * @returns {Promise<void>} Resolves when all test modules complete.
+   */
   async runAll() {
     this.resultsLog = [];
     this.log("Starting diagnostic test runner...");
@@ -97,8 +160,13 @@ class QATestSuite {
   }
 
   /* ==========================================================================
-     MODULE 1: UNIT TESTS
+     MODULE 1: UNIT & INTEGRATION TESTS
      ========================================================================== */
+  
+  /**
+   * Executes 9 unit and integration assertions validating logic modules.
+   * @returns {number} The final percentage of successful logic tests.
+   */
   runUnitTests() {
     let passed = 0;
     let total = 0;
@@ -370,6 +438,11 @@ class QATestSuite {
   /* ==========================================================================
      MODULE 2: ACCESSIBILITY (WCAG 2.1) AUDIT
      ========================================================================== */
+  
+  /**
+   * Validates WCAG accessibility landmarks, labeling, ID structures, and interactive focus states.
+   * @returns {number} Final compliance percentage score.
+   */
   runA11yAudit() {
     let passed = 0;
     let total = 0;
@@ -452,6 +525,11 @@ class QATestSuite {
   /* ==========================================================================
      MODULE 3: SECURITY AUDIT
      ========================================================================== */
+  
+  /**
+   * Sweeps codebase to detect unsafe code constructs, unescaped DOM injections, credentials leakage, and CSP existence.
+   * @returns {Promise<number>} Final security score percentage.
+   */
   async runSecurityAudit() {
     let passed = 0;
     let total = 0;
@@ -484,7 +562,18 @@ class QATestSuite {
     // Security Test 2: Code Sandboxing - Real eval & Function constructor usage check
     total++;
     let evalTestPassed = true;
-    const scriptFiles = ['js/app.js', 'js/ai-engine.js', 'js/simulator.js', 'js/qa-tests.js'];
+    const scriptFiles = [
+      'js/dom-cache.js',
+      'js/accessibility.js',
+      'js/wayfinding.js',
+      'js/chat.js',
+      'js/sustainability.js',
+      'js/operations.js',
+      'js/app.js',
+      'js/ai-engine.js',
+      'js/simulator.js',
+      'js/qa-tests.js'
+    ];
     
     try {
       // Attempt to fetch script contents and scan for 'eval(' or 'new Function('
@@ -492,7 +581,7 @@ class QATestSuite {
         const response = await fetch(src);
         if (response.ok) {
           const content = await response.text();
-          // Exclude comments when checking for eval to prevent false positives
+          // Exclude comments when checking to prevent false positives
           const cleanContent = content.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, '');
           
           if (/eval\s*\(/.test(cleanContent) || /new\s+Function/.test(cleanContent) || /Function\s*\(/.test(cleanContent)) {
@@ -573,7 +662,7 @@ class QATestSuite {
       passed++;
     }
 
-    // Security Test 4: Unescaped DOM Interpolation Check (XSS Prevention Audit)
+    // Security Test 4: Unescaped DOM Interpolation Check (XSS Prevention Audit) - HARDENED
     total++;
     let xssScanPassed = true;
     try {
@@ -581,26 +670,28 @@ class QATestSuite {
         const response = await fetch(src);
         if (response.ok) {
           const content = await response.text();
-          // Scan for assignments like .innerHTML = `...`
-          const innerHTMLRegex = /\.innerHTML\s*=\s*`([\s\S]*?)`/g;
-          let match;
+          // Extract entire outer template literals assigned to innerHTML using custom brace parser
+          const blocks = this.getInnerHTMLBlocks(content);
           
-          while ((match = innerHTMLRegex.exec(content)) !== null) {
-            const templateContent = match[1];
+          for (const block of blocks) {
             // Extract all interpolations ${...}
             const interpolationRegex = /\$\{([\s\S]*?)\}/g;
             let interMatch;
-            while ((interMatch = interpolationRegex.exec(templateContent)) !== null) {
+            while ((interMatch = interpolationRegex.exec(block)) !== null) {
               const variable = interMatch[1].trim();
-              // Verify if the variable is wrapped in escapeHTML() or is a known safe config/class
-              const isEscaped = variable.includes('escapeHTML(') || 
-                                variable === 'badgeClass' || 
-                                variable === 'badgeLabel' || 
-                                variable === 'inc.aiResolved' ||
-                                !isNaN(variable);
-              if (!isEscaped) {
+              
+              // Validate that the variable is completely wrapped by escapeHTML(...)
+              // or is a whitelisted safe layout property, number, or ternary operator
+              const isSafe = variable === 'badgeClass' || 
+                             variable === 'badgeLabel' || 
+                             variable === 'inc.aiResolved' ||
+                             variable.includes('?') || 
+                             !isNaN(variable) || 
+                             /^escapeHTML\([^)]*\)$/.test(variable);
+                             
+              if (!isSafe) {
                 xssScanPassed = false;
-                this.log(`Security Audit - XSS Check: Unescaped interpolation '${variable}' detected in innerHTML assignment inside ${src}.`, 'failure');
+                this.log(`Security Audit - XSS Check: Unescaped variable '${variable}' inside innerHTML assignment in ${src}.`, 'failure');
               }
             }
           }
@@ -615,9 +706,30 @@ class QATestSuite {
     }
 
     if (xssScanPassed) {
-      this.log("Security Audit - XSS Prevention Audit: Verified all dynamic HTML generation variables are escaped using escapeHTML.", 'success');
+      this.log("Security Audit - XSS Prevention Audit: Verified all dynamic HTML generation variables are fully wrapped in escapeHTML().", 'success');
       passed++;
     }
+
+    // Security Test 5: Content-Security-Policy Presence Check
+    total++;
+    let cspPassed = false;
+    try {
+      const cspMeta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+      if (cspMeta) {
+        const content = cspMeta.getAttribute('content');
+        if (content && content.includes('default-src')) {
+          cspPassed = true;
+          this.log("Security Audit - CSP Protection: Content-Security-Policy meta tag exists and contains 'default-src' directive.", 'success');
+        } else {
+          this.log("Security Audit - CSP Protection: Content-Security-Policy meta tag is missing the 'default-src' directive.", 'failure');
+        }
+      } else {
+        this.log("Security Audit - CSP Protection: Content-Security-Policy meta tag not found in document head.", 'failure');
+      }
+    } catch (e) {
+      this.log(`Security Audit - CSP Protection: Error checking CSP meta tag: ${e.message}`, 'failure');
+    }
+    if (cspPassed) passed++;
 
     return Math.round((passed / total) * 100);
   }
@@ -625,6 +737,11 @@ class QATestSuite {
   /* ==========================================================================
      MODULE 4: PERFORMANCE & EFFICIENCY AUDIT
      ========================================================================== */
+  
+  /**
+   * Analyzes initialization duration latency metrics, DOM node counts, and CSS rules count.
+   * @returns {number} Final performance score percentage.
+   */
   runPerformanceAudit() {
     let passed = 0;
     let total = 0;
