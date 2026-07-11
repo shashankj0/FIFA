@@ -198,6 +198,172 @@ class QATestSuite {
       this.log("Unit Test - Wayfinding Algorithm: Wayfinding form parameters missing.", 'failure');
     }
 
+    // Test 5: Portal mode switch test
+    total++;
+    if (typeof window.switchPortalMode === 'function') {
+      const origMode = window.currentPortalMode || 'fan';
+      
+      // Switch to staff portal
+      window.switchPortalMode('staff');
+      const staffBtn = document.getElementById('btn-mode-staff');
+      const staffSection = document.getElementById('section-staff');
+      
+      const staffActive = staffBtn && staffBtn.classList.contains('active') &&
+                          staffSection && staffSection.classList.contains('active');
+                          
+      // Switch back to fan portal
+      window.switchPortalMode('fan');
+      const fanBtn = document.getElementById('btn-mode-fan');
+      const fanSection = document.getElementById('section-map');
+      
+      const fanActive = fanBtn && fanBtn.classList.contains('active') &&
+                        fanSection && fanSection.classList.contains('active');
+                        
+      // Restore
+      window.switchPortalMode(origMode);
+      
+      if (staffActive && fanActive) {
+        this.log("Integration Test - Portal Mode Switch: Successfully navigated between Fan and Venue Staff command centers.", 'success');
+        passed++;
+      } else {
+        this.log("Integration Test - Portal Mode Switch: Tab active states or section classes failed to toggle correctly.", 'failure');
+      }
+    } else {
+      this.log("Integration Test - Portal Mode Switch: switchPortalMode function missing.", 'failure');
+    }
+
+    // Test 6: Incident trigger + resolve round-trip test
+    total++;
+    if (window.stadiumSimulator && typeof window.stadiumSimulator.triggerIncident === 'function' && typeof window.stadiumSimulator.resolveIncident === 'function') {
+      // Record initial Gate C wait time
+      const initialGateCWait = window.stadiumSimulator.state.gates['Gate C (South)'].waitTime;
+      
+      // Trigger dynamic Gate C incident
+      const testIncident = window.stadiumSimulator.triggerIncident('gate-c');
+      const incidentExists = testIncident && window.stadiumSimulator.state.incidents.some(inc => inc.id === testIncident.id && !inc.aiResolved);
+      
+      let resolvePassed = false;
+      let waitTimeDecreased = false;
+      
+      if (incidentExists) {
+        // Resolve incident
+        window.stadiumSimulator.resolveIncident(testIncident.id);
+        const updatedIncident = window.stadiumSimulator.state.incidents.find(inc => inc.id === testIncident.id);
+        resolvePassed = updatedIncident && updatedIncident.aiResolved === true;
+        
+        // Check wait time decrease
+        const postGateCWait = window.stadiumSimulator.state.gates['Gate C (South)'].waitTime;
+        waitTimeDecreased = postGateCWait < 22; // Congested was 22, resolved is 5
+        
+        // Clean up: remove the test incident from array
+        window.stadiumSimulator.state.incidents = window.stadiumSimulator.state.incidents.filter(inc => inc.id !== testIncident.id);
+        window.stadiumSimulator.state.gates['Gate C (South)'].waitTime = initialGateCWait;
+        window.stadiumSimulator.state.gates['Gate C (South)'].status = initialGateCWait > 10 ? 'Busy' : 'Clear';
+        window.stadiumSimulator.state.gates['Gate C (South)'].load = initialGateCWait > 10 ? 'Medium' : 'Low';
+        window.stadiumSimulator.broadcastUpdate();
+      }
+      
+      if (incidentExists && resolvePassed && waitTimeDecreased) {
+        this.log("Integration Test - Incident Dispatch: Real-time incident triggers and AI dispatch resolutions updated simulator metrics successfully.", 'success');
+        passed++;
+      } else {
+        this.log(`Integration Test - Incident Dispatch: Failed. Triggered: ${incidentExists}, Resolved: ${resolvePassed}, Decreased wait: ${waitTimeDecreased}`, 'failure');
+      }
+    } else {
+      this.log("Integration Test - Incident Dispatch: Simulator actions unavailable.", 'failure');
+    }
+
+    // Test 7: Language switch test
+    total++;
+    const chatLangSelect = document.getElementById('chat-lang-select');
+    const chatMsgBox = document.getElementById('chat-messages-box');
+    
+    if (chatLangSelect && chatMsgBox && typeof window.updateChatLanguage === 'function') {
+      const origLang = chatLangSelect.value;
+      const initialBubbleCount = chatMsgBox.children.length;
+      
+      // Switch language to es (Spanish)
+      chatLangSelect.value = 'es';
+      window.updateChatLanguage();
+      
+      const postBubbleCount = chatMsgBox.children.length;
+      const bubbleAppended = postBubbleCount > initialBubbleCount;
+      
+      // Restore
+      chatLangSelect.value = origLang;
+      // Remove the test notification bubble (last child)
+      if (bubbleAppended && chatMsgBox.lastChild) {
+        chatMsgBox.lastChild.remove();
+      }
+      
+      if (bubbleAppended) {
+        this.log("Integration Test - Language Selector: Language toggles dynamically append contextual alerts to user dialogs.", 'success');
+        passed++;
+      } else {
+        this.log("Integration Test - Language Selector: Failed to append language notice bubble.", 'failure');
+      }
+    } else {
+      this.log("Integration Test - Language Selector: Language form selector missing.", 'failure');
+    }
+
+    // Test 8: Accessibility toggle tests
+    total++;
+    const btnSpeech = document.getElementById('btn-speech-toggle');
+    if (typeof window.toggleHighContrast === 'function' && typeof window.toggleTextToSpeech === 'function') {
+      const initialHighContrast = document.body.classList.contains('high-contrast');
+      
+      // Toggle contrast ON
+      window.toggleHighContrast();
+      const hcOn = document.body.classList.contains('high-contrast') !== initialHighContrast;
+      
+      // Toggle contrast OFF
+      window.toggleHighContrast();
+      const hcOff = document.body.classList.contains('high-contrast') === initialHighContrast;
+      
+      // Toggle Speech
+      const initialActiveClass = btnSpeech ? btnSpeech.classList.contains('active') : false;
+      window.toggleTextToSpeech();
+      const speechFlipped = btnSpeech ? (btnSpeech.classList.contains('active') !== initialActiveClass) : true;
+      
+      // Toggle back to clean state
+      window.toggleTextToSpeech();
+      
+      if (hcOn && hcOff && speechFlipped) {
+        this.log("Integration Test - Accessibility Toggles: Contrast and Text-to-Speech visual class overlays toggled successfully.", 'success');
+        passed++;
+      } else {
+        this.log(`Integration Test - Accessibility Toggles: Toggles failed. hcOn=${hcOn}, hcOff=${hcOff}, speechFlipped=${speechFlipped}`, 'failure');
+      }
+    } else {
+      this.log("Integration Test - Accessibility Toggles: Accessibility handlers undefined.", 'failure');
+    }
+
+    // Test 9: Edge case / negative input test for carbon calculator
+    total++;
+    const distInput = document.getElementById('travel-distance');
+    if (distInput && typeof window.calculateCarbonFootprint === 'function') {
+      const origVal = distInput.value;
+      
+      // Set to negative distance
+      distInput.value = "-5";
+      const result = parseFloat(window.calculateCarbonFootprint());
+      
+      // Restore
+      distInput.value = origVal;
+      window.calculateCarbonFootprint();
+      
+      const safeOutput = !isNaN(result) && result >= 0;
+      
+      if (safeOutput) {
+        this.log("Unit Test - Carbon Negative Inputs: Calculator bounds negative travel distance inputs to zero safely (no NaN/negatives).", 'success');
+        passed++;
+      } else {
+        this.log(`Unit Test - Carbon Negative Inputs: Failed. Negative distance returned: ${result}`, 'failure');
+      }
+    } else {
+      this.log("Unit Test - Carbon Negative Inputs: Travel distance elements not found.", 'failure');
+    }
+
     return Math.round((passed / total) * 100);
   }
 

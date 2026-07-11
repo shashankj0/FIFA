@@ -70,9 +70,9 @@ The codebase has been refactored under strict production-grade web guidelines:
 
 ### 3. Automated Diagnostics Suite
 - Evaluates four independent audit modules:
-  1. **Unit & Logic**: Tests coordinate routing, intent classification dictionaries, and carbon logic.
+  1. **Unit & Integration**: Runs 9 comprehensive assertions that call the real functions and validate their return state (Simulator initialization, AI intent mapping keyword checks, Carbon formula accuracy, Wayfinding algorithms, Tab-focus portal switching toggles, simulator Incident dispatch resolution round-trips, dynamic language switcher notices, accessibility preference toggle states, and negative distance boundaries).
   2. **Accessibility**: Audits landmarks, inputs, focusability index, and duplicate DOM IDs.
-  3. **Security**: Runs sandboxing, storage hygiene, and dynamic XSS escaping sweeps.
+  3. **Security**: Runs sandboxing, storage hygiene, dynamic XSS escaping sweeps, and static scan audits for unescaped template string variables in `.innerHTML` assignments.
   4. **Performance**: Measures load speeds and rendering complexity density.
 
 ---
