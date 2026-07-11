@@ -98,6 +98,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize view states
   switchPortalMode('fan');
+  if (window.stadiumSimulator) {
+    updateDashboardUI(window.stadiumSimulator.state);
+  }
   
   // Set up screen-reader announcement container dynamically
   const ariaAnnounce = document.createElement('div');
