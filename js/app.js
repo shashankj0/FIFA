@@ -10,6 +10,18 @@ let currentActiveTab = 'map';  // 'map', 'assistant', 'sustainability', 'tests'
 let isTextToSpeechActive = false;
 let currentFontSizePercent = 100;
 
+// HTML Escaper Utility for XSS mitigation
+function escapeHTML(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+window.escapeHTML = escapeHTML;
+
 // Coordinate Mapping for Stadium Nodes
 const NODE_COORDINATES = {
   'Gate A (North)': { x: 400, y: 30 },
@@ -660,14 +672,20 @@ function updateDashboardUI(state) {
         const badgeClass = inc.level === 'critical' ? 'alert-badge-critical' : 'alert-badge-warning';
         const badgeLabel = inc.aiResolved ? 'RESOLVED' : inc.level.toUpperCase();
         
+        const cleanTitle = escapeHTML(inc.title);
+        const cleanDescription = escapeHTML(inc.description);
+        const cleanTimestamp = escapeHTML(inc.timestamp);
+        const cleanId = escapeHTML(inc.id);
+        const cleanTarget = escapeHTML(inc.target);
+
         row.innerHTML = `
           <div>
             <span class="badge ${badgeClass}">${badgeLabel}</span>
-            <strong>${inc.title}</strong>: ${inc.description} <small class="metric-subtext" style="display:block; margin-top:2px;">Logged at: ${inc.timestamp}</small>
+            <strong>${cleanTitle}</strong>: ${cleanDescription} <small class="metric-subtext" style="display:block; margin-top:2px;">Logged at: ${cleanTimestamp}</small>
           </div>
           <div>
             ${!inc.aiResolved 
-              ? `<button class="btn btn-secondary" data-action="resolve-incident" data-incident-id="${inc.id}" data-target-area="${inc.target}">AI Resolve Plan</button>` 
+              ? `<button class="btn btn-secondary" data-action="resolve-incident" data-incident-id="${cleanId}" data-target-area="${cleanTarget}">AI Resolve Plan</button>` 
               : `<span class="text-primary-color" style="font-weight:700;">🟢 Dispatched</span>`
             }
           </div>

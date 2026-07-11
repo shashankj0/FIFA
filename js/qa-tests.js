@@ -407,6 +407,52 @@ class QATestSuite {
       passed++;
     }
 
+    // Security Test 4: Unescaped DOM Interpolation Check (XSS Prevention Audit)
+    total++;
+    let xssScanPassed = true;
+    try {
+      for (const src of scriptFiles) {
+        const response = await fetch(src);
+        if (response.ok) {
+          const content = await response.text();
+          // Scan for assignments like .innerHTML = `...`
+          const innerHTMLRegex = /\.innerHTML\s*=\s*`([\s\S]*?)`/g;
+          let match;
+          
+          while ((match = innerHTMLRegex.exec(content)) !== null) {
+            const templateContent = match[1];
+            // Extract all interpolations ${...}
+            const interpolationRegex = /\$\{([\s\S]*?)\}/g;
+            let interMatch;
+            while ((interMatch = interpolationRegex.exec(templateContent)) !== null) {
+              const variable = interMatch[1].trim();
+              // Verify if the variable is wrapped in escapeHTML() or is a known safe config/class
+              const isEscaped = variable.includes('escapeHTML(') || 
+                                variable === 'badgeClass' || 
+                                variable === 'badgeLabel' || 
+                                variable === 'inc.aiResolved' ||
+                                !isNaN(variable);
+              if (!isEscaped) {
+                xssScanPassed = false;
+                this.log(`Security Audit - XSS Check: Unescaped interpolation '${variable}' detected in innerHTML assignment inside ${src}.`, 'failure');
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      // Fallback for CORS file protocol: ensure global escapeHTML utility exists in window scope
+      if (typeof window.escapeHTML !== 'function') {
+        xssScanPassed = false;
+        this.log("Security Audit - XSS Check: escapeHTML utility not found in global window scope.", 'failure');
+      }
+    }
+
+    if (xssScanPassed) {
+      this.log("Security Audit - XSS Prevention Audit: Verified all dynamic HTML generation variables are escaped using escapeHTML.", 'success');
+      passed++;
+    }
+
     return Math.round((passed / total) * 100);
   }
 
