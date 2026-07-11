@@ -22,15 +22,15 @@
       <div class="header-logo-section">
         <div class="header-logo-icon" aria-hidden="true">⚽</div>
         <div class="header-title-text">
-          <h1>ArenaMind <span style="color: var(--color-primary);">2026</span></h1>
+          <h1>ArenaMind <span class="text-primary-color">2026</span></h1>
         </div>
       </div>
 
       <div class="header-controls">
         <!-- Dual Mode Toggle (Fan vs Venue Staff) -->
         <div class="mode-toggle-group" role="group" aria-label="Portal mode switcher">
-          <button id="btn-mode-fan" class="mode-toggle-btn active" onclick="switchPortalMode('fan')">Fan Hub</button>
-          <button id="btn-mode-staff" class="mode-toggle-btn" onclick="switchPortalMode('staff')">Operations Command</button>
+          <button id="btn-mode-fan" class="mode-toggle-btn active">Fan Hub</button>
+          <button id="btn-mode-staff" class="mode-toggle-btn">Operations Command</button>
         </div>
       </div>
     </header>
@@ -40,22 +40,22 @@
       <ul class="nav-menu" id="navigation-links">
         <!-- Dynamic based on Mode, handled in JS -->
         <li>
-          <button id="nav-btn-map" class="nav-item-btn active" onclick="switchTab('map')">
+          <button id="nav-btn-map" class="nav-item-btn active" data-tab="map">
             <span aria-hidden="true">🗺️</span> Stadium Navigation
           </button>
         </li>
         <li>
-          <button id="nav-btn-assistant" class="nav-item-btn" onclick="switchTab('assistant')">
+          <button id="nav-btn-assistant" class="nav-item-btn" data-tab="assistant">
             <span aria-hidden="true">🤖</span> GenAI Assistant
           </button>
         </li>
         <li>
-          <button id="nav-btn-sustainability" class="nav-item-btn" onclick="switchTab('sustainability')">
+          <button id="nav-btn-sustainability" class="nav-item-btn" data-tab="sustainability">
             <span aria-hidden="true">🌱</span> Sustainability Hub
           </button>
         </li>
         <li>
-          <button id="nav-btn-tests" class="nav-item-btn" onclick="switchTab('tests')">
+          <button id="nav-btn-tests" class="nav-item-btn" data-tab="tests">
             <span aria-hidden="true">🧪</span> QA Testing Center
           </button>
         </li>
@@ -76,16 +76,16 @@
       <!-- ACCESSIBILITY CONTROL PANEL (Top of Viewport) -->
       <section class="accessibility-bar" aria-label="Accessibility & Preferences">
         <span class="acc-title">♿ Accessibility Preferences:</span>
-        <button id="btn-contrast-toggle" class="btn btn-secondary" onclick="toggleHighContrast()">
+        <button id="btn-contrast-toggle" class="btn btn-secondary">
           🌗 High Contrast Mode
         </button>
-        <button id="btn-text-scale-inc" class="btn btn-secondary" onclick="adjustTextScale(true)">
+        <button id="btn-text-scale-inc" class="btn btn-secondary">
           ➕ Increase Text Size
         </button>
-        <button id="btn-text-scale-dec" class="btn btn-secondary" onclick="adjustTextScale(false)">
+        <button id="btn-text-scale-dec" class="btn btn-secondary">
           ➖ Decrease Text Size
         </button>
-        <button id="btn-speech-toggle" class="btn btn-secondary" onclick="toggleTextToSpeech()">
+        <button id="btn-speech-toggle" class="btn btn-secondary">
           🔊 Text-to-Speech (Off)
         </button>
       </section>
@@ -96,7 +96,7 @@
         
         <div class="grid-layout">
           <!-- Live Arena Card -->
-          <div class="card" style="grid-column: span 2;">
+          <div class="card col-span-2">
             <div class="card-title-bar">
               <h3 class="card-title">🏟️ Live Interactive Stadium Layout</h3>
               <span class="badge badge-success">Interactive</span>
@@ -126,42 +126,42 @@
                 
                 <!-- Gates (Intersections) -->
                 <!-- Gate A (North) -->
-                <circle id="gate-a" class="map-node" cx="400" cy="30" r="14" fill="var(--color-primary)" stroke="#fff" stroke-width="2" cursor="pointer" onclick="selectMapNode('Gate A (North)')" tabindex="0" role="button" aria-label="Gate A North Entrance" />
+                <circle id="gate-a" class="map-node interactive-map-node" cx="400" cy="30" r="14" fill="var(--color-primary)" stroke="#fff" stroke-width="2" data-node-name="Gate A (North)" tabindex="0" role="button" aria-label="Gate A North Entrance" />
                 <text x="400" y="25" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold" pointer-events="none">A</text>
                 
                 <!-- Gate B (East) -->
-                <circle id="gate-b" class="map-node" cx="760" cy="250" r="14" fill="var(--color-primary)" stroke="#fff" stroke-width="2" cursor="pointer" onclick="selectMapNode('Gate B (East)')" tabindex="0" role="button" aria-label="Gate B East Entrance" />
+                <circle id="gate-b" class="map-node interactive-map-node" cx="760" cy="250" r="14" fill="var(--color-primary)" stroke="#fff" stroke-width="2" data-node-name="Gate B (East)" tabindex="0" role="button" aria-label="Gate B East Entrance" />
                 <text x="760" y="245" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold" pointer-events="none">B</text>
 
                 <!-- Gate C (South) -->
-                <circle id="gate-c" class="map-node" cx="400" cy="470" r="14" fill="var(--color-primary)" stroke="#fff" stroke-width="2" cursor="pointer" onclick="selectMapNode('Gate C (South)')" tabindex="0" role="button" aria-label="Gate C South Entrance" />
+                <circle id="gate-c" class="map-node interactive-map-node" cx="400" cy="470" r="14" fill="var(--color-primary)" stroke="#fff" stroke-width="2" data-node-name="Gate C (South)" tabindex="0" role="button" aria-label="Gate C South Entrance" />
                 <text x="400" y="465" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold" pointer-events="none">C</text>
 
                 <!-- Gate D (West) -->
-                <circle id="gate-d" class="map-node" cx="40" cy="250" r="14" fill="var(--color-primary)" stroke="#fff" stroke-width="2" cursor="pointer" onclick="selectMapNode('Gate D (West)')" tabindex="0" role="button" aria-label="Gate D West Entrance" />
+                <circle id="gate-d" class="map-node interactive-map-node" cx="40" cy="250" r="14" fill="var(--color-primary)" stroke="#fff" stroke-width="2" data-node-name="Gate D (West)" tabindex="0" role="button" aria-label="Gate D West Entrance" />
                 <text x="40" y="245" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold" pointer-events="none">D</text>
 
                 <!-- Amenities/Concessions (Inside tier) -->
                 <!-- Sensory Room (Accessibility POI) -->
-                <g class="map-node-group" cursor="pointer" onclick="selectMapNode('Sensory Friendly Room - Concourse 1')" tabindex="0" role="button" aria-label="Sensory Friendly Room, Concourse 1">
+                <g class="map-node-group interactive-map-node" data-node-name="Sensory Friendly Room - Concourse 1" tabindex="0" role="button" aria-label="Sensory Friendly Room, Concourse 1">
                   <rect x="200" y="90" width="30" height="30" rx="6" fill="var(--color-info)" stroke="#fff" />
                   <text x="215" y="110" text-anchor="middle" font-size="16" pointer-events="none">🧩</text>
                 </g>
                 
                 <!-- Concession Area B (Food - Sustainability POI) -->
-                <g class="map-node-group" cursor="pointer" onclick="selectMapNode('Concessions Green Hub - Block 105')" tabindex="0" role="button" aria-label="Concessions Green Hub, Block 105">
+                <g class="map-node-group interactive-map-node" data-node-name="Concessions Green Hub - Block 105" tabindex="0" role="button" aria-label="Concessions Green Hub, Block 105">
                   <rect x="580" y="110" width="30" height="30" rx="6" fill="var(--color-accent)" stroke="#fff" />
                   <text x="595" y="130" text-anchor="middle" font-size="16" pointer-events="none">🍔</text>
                 </g>
 
                 <!-- Wheelchair Seating Tier -->
-                <g class="map-node-group" cursor="pointer" onclick="selectMapNode('Wheelchair Reserved Seating - Block 112')" tabindex="0" role="button" aria-label="Wheelchair Reserved Seating, Block 112">
+                <g class="map-node-group interactive-map-node" data-node-name="Wheelchair Reserved Seating - Block 112" tabindex="0" role="button" aria-label="Wheelchair Reserved Seating, Block 112">
                   <rect x="180" y="370" width="30" height="30" rx="6" fill="var(--color-primary)" stroke="#fff" />
                   <text x="195" y="390" text-anchor="middle" font-size="16" pointer-events="none">♿</text>
                 </g>
 
                 <!-- Medical Station -->
-                <g class="map-node-group" cursor="pointer" onclick="selectMapNode('Medical Station 2 - Gate D')" tabindex="0" role="button" aria-label="Medical Station 2, near Gate D">
+                <g class="map-node-group interactive-map-node" data-node-name="Medical Station 2 - Gate D" tabindex="0" role="button" aria-label="Medical Station 2, near Gate D">
                   <rect x="110" y="150" width="30" height="30" rx="6" fill="var(--color-danger)" stroke="#fff" />
                   <text x="125" y="170" text-anchor="middle" font-size="16" pointer-events="none">❤️</text>
                 </g>
@@ -175,19 +175,19 @@
               <!-- Legend overlay -->
               <div class="map-legend">
                 <div class="legend-item">
-                  <div class="legend-dot" style="background-color: var(--color-primary);"></div>
+                  <div class="legend-dot bg-primary-block"></div>
                   <span>Main Gates (A, B, C, D)</span>
                 </div>
                 <div class="legend-item">
-                  <div class="legend-dot" style="background-color: var(--color-info);"></div>
+                  <div class="legend-dot bg-info-block"></div>
                   <span>Accessibility / Sensory Rooms</span>
                 </div>
                 <div class="legend-item">
-                  <div class="legend-dot" style="background-color: var(--color-accent);"></div>
+                  <div class="legend-dot bg-accent-block"></div>
                   <span>Green Concessions & Dining</span>
                 </div>
                 <div class="legend-item">
-                  <div class="legend-dot" style="background-color: var(--color-danger);"></div>
+                  <div class="legend-dot bg-danger-block"></div>
                   <span>Medical & Safety Station</span>
                 </div>
               </div>
@@ -199,10 +199,10 @@
             <div class="card-title-bar">
               <h3 class="card-title">📍 Smart Wayfinding Planner</h3>
             </div>
-            <form id="routing-form" onsubmit="event.preventDefault(); calculateRoute();" class="flex-column">
+            <form id="routing-form" class="flex-column">
               <div>
-                <label for="route-start" style="display:block; margin-bottom:5px; font-weight:600;">Starting Location:</label>
-                <select id="route-start" class="chat-text-input" style="width:100%;">
+                <label for="route-start" class="form-label">Starting Location:</label>
+                <select id="route-start" class="chat-text-input w-full">
                   <option value="Gate A (North)">Gate A (North Entrance)</option>
                   <option value="Gate B (East)">Gate B (East Entrance)</option>
                   <option value="Gate C (South)">Gate C (South Entrance)</option>
@@ -211,8 +211,8 @@
               </div>
 
               <div>
-                <label for="route-end" style="display:block; margin-bottom:5px; font-weight:600;">Destination:</label>
-                <select id="route-end" class="chat-text-input" style="width:100%;">
+                <label for="route-end" class="form-label">Destination:</label>
+                <select id="route-end" class="chat-text-input w-full">
                   <option value="Wheelchair Reserved Seating - Block 112">Block 112 (Wheelchair Access)</option>
                   <option value="Sensory Friendly Room - Concourse 1">Sensory Friendly Room</option>
                   <option value="Concessions Green Hub - Block 105">Green Concessions Hub</option>
@@ -221,24 +221,24 @@
               </div>
 
               <div>
-                <label for="route-option" style="display:block; margin-bottom:5px; font-weight:600;">Route Preference:</label>
-                <select id="route-option" class="chat-text-input" style="width:100%;">
+                <label for="route-option" class="form-label">Route Preference:</label>
+                <select id="route-option" class="chat-text-input w-full">
                   <option value="shortest">Shortest Path</option>
                   <option value="accessible" selected>ADA / Wheelchair Accessible (No Stairs)</option>
                   <option value="low-crowd">Low Crowd/Sensory Friendly</option>
                 </select>
               </div>
 
-              <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">
+              <button type="submit" class="btn btn-primary w-full-center">
                 🔍 Generate Smart Route
               </button>
             </form>
 
-            <div id="route-result-panel" class="route-results-panel" style="display:none;" aria-live="polite">
-              <h4 style="color: var(--color-primary); margin-bottom: 8px;">Routing Solution Found:</h4>
-              <p id="route-directions" style="font-size:0.9rem; color:var(--text-primary); margin-bottom:8px;"></p>
-              <div style="font-size:0.8rem; color:var(--text-secondary);">
-                <span>Est. Time: <strong id="route-eta" style="color:var(--color-accent);"></strong></span> | 
+            <div id="route-result-panel" class="route-results-panel hidden" aria-live="polite">
+              <h4 class="route-title">Routing Solution Found:</h4>
+              <p id="route-directions" class="route-desc"></p>
+              <div class="route-meta">
+                <span>Est. Time: <strong id="route-eta" class="text-accent-color"></strong></span> | 
                 <span>Distance: <strong id="route-distance"></strong></span>
               </div>
             </div>
@@ -251,12 +251,12 @@
         <h2 id="heading-assistant" class="sr-only">GenAI Assistant</h2>
         <div class="grid-layout">
           
-          <div class="card" style="grid-column: span 2;">
+          <div class="card col-span-2">
             <div class="card-title-bar">
               <h3 class="card-title">🤖 Multilingual World Cup GenAI Concierge</h3>
               <div class="flex-row">
                 <label for="chat-lang-select" class="sr-only">Select Language</label>
-                <select id="chat-lang-select" class="chat-text-input" style="padding: 4px 8px; font-size: 0.85rem;" onchange="updateChatLanguage()">
+                <select id="chat-lang-select" class="chat-text-input chat-lang-select-input">
                   <option value="en" selected>English 🇺🇸</option>
                   <option value="es">Español 🇲🇽</option>
                   <option value="fr">Français 🇨🇦</option>
@@ -281,14 +281,14 @@
 
               <!-- Suggested prompt quick chips -->
               <div class="chat-suggested-prompts" id="chat-chips-container">
-                <button class="prompt-chip" onclick="submitQuickPrompt('Where is the nearest wheelchair-accessible entrance?')">♿ Accessible Entrance</button>
-                <button class="prompt-chip" onclick="submitQuickPrompt('How do I take the express shuttle back to New York City?')">🚍 NYC Transit Express</button>
-                <button class="prompt-chip" onclick="submitQuickPrompt('Where can I get a low carbon footprint burger?')">🌱 Sustainable Dining</button>
-                <button class="prompt-chip" onclick="submitQuickPrompt('What language assistance is available for non-English speakers?')">🗣️ Translate Help</button>
+                <button class="prompt-chip" data-prompt="Where is the nearest wheelchair-accessible entrance?">♿ Accessible Entrance</button>
+                <button class="prompt-chip" data-prompt="How do I take the express shuttle back to New York City?">🚍 NYC Transit Express</button>
+                <button class="prompt-chip" data-prompt="Where can I get a low carbon footprint burger?">🌱 Sustainable Dining</button>
+                <button class="prompt-chip" data-prompt="What language assistance is available for non-English speakers?">🗣️ Translate Help</button>
               </div>
 
               <!-- Form for manual typing -->
-              <form id="chat-input-form" class="chat-input-form" onsubmit="event.preventDefault(); handleChatSubmit();">
+              <form id="chat-input-form" class="chat-input-form">
                 <input type="text" id="chat-text-field" class="chat-text-input" placeholder="Type your stadium or tournament query here..." aria-label="Ask the stadium GenAI assistant">
                 <button type="submit" class="btn btn-primary">Send</button>
               </form>
@@ -300,12 +300,12 @@
             <div class="card-title-bar">
               <h3 class="card-title">🔍 Contextual Prompter</h3>
             </div>
-            <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:var(--spacing-md);">
+            <p class="assistant-desc">
               Our GenAI leverages live sensor feeds (gate lines, transport, crowd occupancy) to frame context injection.
             </p>
-            <div style="font-size:0.85rem; background: var(--bg-tertiary); padding: var(--spacing-md); border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-              <strong style="color:var(--color-primary); display:block; margin-bottom:5px;">System Prompt Context:</strong>
-              <code id="debug-prompt-context" style="display:block; word-break:break-all; font-family:monospace; line-height:1.3; color:var(--text-muted);">
+            <div class="context-box">
+              <strong class="context-title">System Prompt Context:</strong>
+              <code id="debug-prompt-context" class="context-code">
                 [Gate A: 4 min wait | Route B: High Crowd | Rail station: Active shuttle | Concessions: Plant-based 20% off]
               </code>
             </div>
@@ -322,10 +322,10 @@
             <div class="card-title-bar">
               <h3 class="card-title">🌱 Matchday Carbon Calculator</h3>
             </div>
-            <form id="carbon-form" class="flex-column" oninput="calculateCarbonFootprint()">
+            <form id="carbon-form" class="flex-column">
               <div>
-                <label for="transport-type" style="display:block; margin-bottom:5px; font-weight:600;">Transportation Mode:</label>
-                <select id="transport-type" class="chat-text-input" style="width:100%;">
+                <label for="transport-type" class="form-label">Transportation Mode:</label>
+                <select id="transport-type" class="chat-text-input w-full">
                   <option value="train">Express Rail Transit (0.05 kg CO2/mi)</option>
                   <option value="bus">Tournament Shuttle Bus (0.08 kg CO2/mi)</option>
                   <option value="carpool">Carpool Vehicle (0.18 kg CO2/mi)</option>
@@ -334,13 +334,13 @@
               </div>
 
               <div>
-                <label for="travel-distance" style="display:block; margin-bottom:5px; font-weight:600;">Travel Distance (Miles):</label>
-                <input type="number" id="travel-distance" class="chat-text-input" style="width:100%;" min="0" max="300" value="25">
+                <label for="travel-distance" class="form-label">Travel Distance (Miles):</label>
+                <input type="number" id="travel-distance" class="chat-text-input w-full" min="0" max="300" value="25">
               </div>
 
               <div>
-                <label for="food-choice" style="display:block; margin-bottom:5px; font-weight:600;">Dining Selection:</label>
-                <select id="food-choice" class="chat-text-input" style="width:100%;">
+                <label for="food-choice" class="form-label">Dining Selection:</label>
+                <select id="food-choice" class="chat-text-input w-full">
                   <option value="plant">Plant-Based Burger & Compostable Cup (0.4 kg CO2)</option>
                   <option value="chicken">Poultry Tacos & Recycled Cup (1.2 kg CO2)</option>
                   <option value="beef">Traditional Beef Burger (4.8 kg CO2)</option>
@@ -348,8 +348,8 @@
               </div>
 
               <div>
-                <label for="waste-offset" style="display:block; margin-bottom:5px; font-weight:600;">Recycling action on site:</label>
-                <select id="waste-offset" class="chat-text-input" style="width:100%;">
+                <label for="waste-offset" class="form-label">Recycling action on site:</label>
+                <select id="waste-offset" class="chat-text-input w-full">
                   <option value="none">No recycling planned (0 kg Offset)</option>
                   <option value="basic">Standard bottle sorting (-0.5 kg Offset)</option>
                   <option value="champion">Compost and Zero-waste champion (-1.5 kg Offset)</option>
@@ -363,14 +363,14 @@
               <h3 class="card-title">📊 Your Fan Carbon Estimate</h3>
               <span class="badge badge-success">Live Track</span>
             </div>
-            <div class="flex-column" style="align-items:center; justify-content:center; text-align:center; padding:var(--spacing-md) 0;">
-              <div id="carbon-footprint-value" class="metric-value-huge" style="color: var(--color-primary);">1.25</div>
-              <div style="font-weight:700; font-size:1.1rem; margin-top:5px;">kg of CO₂ Equivalent</div>
-              <div id="carbon-tier-desc" style="color:var(--text-secondary); margin-top:5px; font-size:0.9rem;">Green Fan Level: Elite Champion 🟢</div>
+            <div class="carbon-metric-container">
+              <div id="carbon-footprint-value" class="metric-value-huge text-primary-color">1.25</div>
+              <div class="carbon-metric-unit">kg of CO₂ Equivalent</div>
+              <div id="carbon-tier-desc" class="carbon-metric-tier text-primary-color">Green Fan Level: Elite Champion 🟢</div>
             </div>
             
-            <div style="background-color: var(--bg-tertiary); padding:var(--spacing-md); border-radius:var(--radius-sm); border:1px solid var(--border-color); font-size:0.85rem;">
-              <strong style="color: var(--color-accent); display:block; margin-bottom:5px;">AI Green Advice:</strong>
+            <div class="carbon-advice-box">
+              <strong class="carbon-advice-title">AI Green Advice:</strong>
               <p id="sustainability-ai-advice">Loading dynamic sustainability recommendation based on selections...</p>
             </div>
           </div>
@@ -389,31 +389,31 @@
             </div>
             <div id="staff-metric-occupancy" class="metric-value-huge">74,289</div>
             <div class="metric-trend trend-up">📈 +1.2% this minute</div>
-            <div style="margin-top:var(--spacing-sm); font-size:0.85rem; color:var(--text-muted);">Capacity: 82,500 seats</div>
+            <div class="metric-subtext">Capacity: 82,500 seats</div>
           </div>
 
           <div class="card">
             <div class="card-title-bar">
               <h3 class="card-title">⏱️ Peak Gate Queue ETA</h3>
             </div>
-            <div id="staff-metric-eta" class="metric-value-huge" style="color: var(--color-accent);">18 min</div>
+            <div id="staff-metric-eta" class="metric-value-huge text-accent-color">18 min</div>
             <div class="metric-trend trend-down">📉 Gate D: Congestion detected</div>
-            <div style="margin-top:var(--spacing-sm); font-size:0.85rem; color:var(--text-muted);">Avg wait at Gate A, B, C: 4 min</div>
+            <div class="metric-subtext">Avg wait at Gate A, B, C: 4 min</div>
           </div>
 
           <div class="card">
             <div class="card-title-bar">
               <h3 class="card-title">⚠️ Active Incidents</h3>
             </div>
-            <div id="staff-metric-incidents" class="metric-value-huge" style="color: var(--color-danger);">2</div>
+            <div id="staff-metric-incidents" class="metric-value-huge text-danger-color">2</div>
             <div class="metric-trend trend-neutral">🚨 Response dispatch in progress</div>
-            <div style="margin-top:var(--spacing-sm); font-size:0.85rem; color:var(--text-muted);">AI tactical recommendations active</div>
+            <div class="metric-subtext">AI tactical recommendations active</div>
           </div>
         </div>
 
         <div class="grid-layout">
           <!-- Live Incidents List and Dispatcher -->
-          <div class="card" style="grid-column: span 2;">
+          <div class="card col-span-2">
             <div class="card-title-bar">
               <h3 class="card-title">🚨 Active Incidents & GenAI Dispatch Control</h3>
               <span class="badge badge-success">Real-time Feed</span>
@@ -422,20 +422,20 @@
               <!-- Dynamic alert rows will load here -->
               <div class="alert-row critical">
                 <div>
-                  <span class="badge badge-success" style="background-color:var(--color-danger); color:#fff; margin-right:8px;">CRITICAL</span>
+                  <span class="badge badge-success critical-badge-bg">CRITICAL</span>
                   <strong>Gate D Bottleneck</strong>: Queue time exceeds 18 minutes. Crowd forming outside security lanes.
                 </div>
-                <button class="btn btn-secondary" onclick="simulateIncidentResponse('gate-d')">AI Resolve Plan</button>
+                <button class="btn btn-secondary" data-action="resolve-incident" data-incident-id="gate-d" data-target-area="Gate D (West)">AI Resolve Plan</button>
               </div>
             </div>
 
             <!-- Simulator Actions -->
-            <div class="sim-controls-panel">
-              <strong style="width:100%; display:block; font-size:0.85rem; color:var(--text-muted);">SIMULATOR TRIGGERS:</strong>
-              <button class="btn btn-secondary" onclick="triggerMockIncident('gate-c')">Simulate Gate C Congestion</button>
-              <button class="btn btn-secondary" onclick="triggerMockIncident('medical')">Simulate Fan Medical Aid Request</button>
-              <button class="btn btn-secondary" onclick="triggerMockIncident('concession')">Simulate Concession Line Spike</button>
-              <button class="btn btn-primary" onclick="resetSimulatorData()">Reset Sim Data</button>
+            <div class="sim-controls-panel" id="simulator-controls">
+              <strong class="sim-triggers-label">SIMULATOR TRIGGERS:</strong>
+              <button class="btn btn-secondary" data-trigger="gate-c">Simulate Gate C Congestion</button>
+              <button class="btn btn-secondary" data-trigger="medical">Simulate Fan Medical Aid Request</button>
+              <button class="btn btn-secondary" data-trigger="concession">Simulate Concession Line Spike</button>
+              <button class="btn btn-primary" data-action="reset-sim">Reset Sim Data</button>
             </div>
           </div>
 
@@ -444,17 +444,17 @@
             <div class="card-title-bar">
               <h3 class="card-title">🧠 AI Tactical Commander</h3>
             </div>
-            <div style="height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+            <div class="tactical-flex-container">
               <div>
-                <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:8px;">
+                <p class="tactical-description">
                   Active operation guidelines generated on demand to resolve stadium anomalies.
                 </p>
-                <div id="ai-tactical-response-container" style="background:var(--bg-tertiary); border:1px solid var(--border-color); padding:var(--spacing-md); border-radius:var(--radius-sm); font-size:0.85rem; min-height:120px;">
+                <div id="ai-tactical-response-container" class="tactical-content-box">
                   No active critical issues. Stadium operations are stable. Select an incident resolving plan or trigger simulated incidents to view tactical AI support.
                 </div>
               </div>
-              <div style="margin-top:var(--spacing-md);">
-                <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="requestTacticalBriefing()">
+              <div class="mt-md">
+                <button id="btn-tactical-briefing" class="btn btn-primary w-full-center">
                   🔄 Generate Operation Summary
                 </button>
               </div>
@@ -469,45 +469,45 @@
         <div class="test-suite-panel">
           <div class="test-summary-header">
             <div>
-              <h3 style="font-size:1.5rem; margin-bottom:5px;">🧪 In-Browser Automated QA & Audit Suite</h3>
-              <p style="font-size:0.9rem; color:var(--text-secondary);">
+              <h3 class="test-logs-heading">🧪 In-Browser Automated QA & Audit Suite</h3>
+              <p class="test-subtitle">
                 Validating App Architecture, Accessibility (WCAG 2.1 compliance), DOM Security, AI Engines, and Simulation Accuracy.
               </p>
             </div>
-            <button id="btn-run-tests" class="btn btn-primary" style="padding: 10px 20px; font-size:1rem;" onclick="runSuiteTests()">
+            <button id="btn-run-tests" class="btn btn-primary btn-large">
               ⚡ Run Diagnostic Suite
             </button>
           </div>
 
-          <div class="flex-row flex-between" style="margin-bottom:var(--spacing-sm);">
+          <div class="flex-row flex-between mb-sm">
             <span>Testing Progress:</span>
-            <span id="test-progress-counter" style="font-weight:700;">0/4 Modules Run</span>
+            <span id="test-progress-counter" class="font-bold">0/4 Modules Run</span>
           </div>
 
           <div class="test-progress-bar-container">
             <div id="test-progress-bar-inner" class="test-progress-bar-fill"></div>
           </div>
 
-          <div class="grid-layout" style="margin-top:var(--spacing-lg);">
-            <div class="card" style="padding:var(--spacing-md); border-color:#10b981;">
-              <h4 style="font-size:0.9rem; color:#10b981; margin-bottom:5px;">Unit Tests Coverage</h4>
-              <div id="test-coverage-unit" style="font-size:1.75rem; font-weight:800;">0%</div>
+          <div class="grid-layout mt-lg">
+            <div class="card card-unit">
+              <h4 class="test-module-title">Unit Tests Coverage</h4>
+              <div id="test-coverage-unit" class="test-module-value">0%</div>
             </div>
-            <div class="card" style="padding:var(--spacing-md); border-color:#3b82f6;">
-              <h4 style="font-size:0.9rem; color:#3b82f6; margin-bottom:5px;">A11y (WCAG) Check</h4>
-              <div id="test-coverage-a11y" style="font-size:1.75rem; font-weight:800;">0%</div>
+            <div class="card card-a11y">
+              <h4 class="test-module-title">A11y (WCAG) Check</h4>
+              <div id="test-coverage-a11y" class="test-module-value">0%</div>
             </div>
-            <div class="card" style="padding:var(--spacing-md); border-color:#f59e0b;">
-              <h4 style="font-size:0.9rem; color:#f59e0b; margin-bottom:5px;">Security Vulnerability Audit</h4>
-              <div id="test-coverage-security" style="font-size:1.75rem; font-weight:800;">0%</div>
+            <div class="card card-security">
+              <h4 class="test-module-title">Security Vulnerability Audit</h4>
+              <div id="test-coverage-security" class="test-module-value">0%</div>
             </div>
-            <div class="card" style="padding:var(--spacing-md); border-color:#ec4899;">
-              <h4 style="font-size:0.9rem; color:#ec4899; margin-bottom:5px;">Performance & Efficiency Index</h4>
-              <div id="test-coverage-performance" style="font-size:1.75rem; font-weight:800;">0%</div>
+            <div class="card card-performance">
+              <h4 class="test-module-title">Performance & Efficiency Index</h4>
+              <div id="test-coverage-performance" class="test-module-value">0%</div>
             </div>
           </div>
 
-          <h4 style="margin: var(--spacing-md) 0 var(--spacing-sm) 0; font-size:1rem; font-weight:600;">Detailed Diagnostic Logs:</h4>
+          <h4 class="test-logs-heading">Detailed Diagnostic Logs:</h4>
           <div id="test-results-box" class="test-results-log">
             [System Log Ready] Press "Run Diagnostic Suite" to start validation execution.
           </div>

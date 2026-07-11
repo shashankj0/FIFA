@@ -146,41 +146,50 @@ Estimated time to relieve: **8 minutes** under current dispatch guidelines.`;
     return "System status is nominal. No tactical dispatch overrides required.";
   }
 
-  // Dynamic text streaming into a target element with word-by-word delays
+  // Dynamic text streaming into a target element with word-by-word delays using requestAnimationFrame
   streamText(text, element, onCompleteCallback) {
     element.innerHTML = "";
     element.classList.add('streaming');
     
     const words = text.split(" ");
     let i = 0;
+    const interval = 45; // ms speed adjustment for smooth reading
+    let lastTime = performance.now();
     
-    const timer = setInterval(() => {
+    function step(timestamp) {
       if (i < words.length) {
-        // Safe text appending to prevent XSS
-        const span = document.createElement('span');
-        // Handle basic bold syntax markdown for neat typography
-        let word = words[i];
-        if (word.startsWith('**') && word.endsWith('**')) {
-          span.style.fontWeight = 'bold';
-          span.textContent = word.replace(/\*\*/g, '') + ' ';
-        } else if (word.startsWith('**')) {
-          span.style.fontWeight = 'bold';
-          span.textContent = word.replace(/^\*\*/, '') + ' ';
-        } else if (word.endsWith('**')) {
-          span.style.fontWeight = 'bold';
-          span.textContent = word.replace(/\*\*$/, '') + ' ';
-        } else {
-          span.textContent = word + ' ';
+        const elapsed = timestamp - lastTime;
+        if (elapsed >= interval) {
+          lastTime = timestamp - (elapsed % interval);
+          
+          // Safe text appending to prevent XSS
+          const span = document.createElement('span');
+          // Handle basic bold syntax markdown for neat typography
+          let word = words[i];
+          if (word.startsWith('**') && word.endsWith('**')) {
+            span.classList.add('text-bold');
+            span.textContent = word.replace(/\*\*/g, '') + ' ';
+          } else if (word.startsWith('**')) {
+            span.classList.add('text-bold');
+            span.textContent = word.replace(/^\*\*/, '') + ' ';
+          } else if (word.endsWith('**')) {
+            span.classList.add('text-bold');
+            span.textContent = word.replace(/\*\*$/, '') + ' ';
+          } else {
+            span.textContent = word + ' ';
+          }
+          element.appendChild(span);
+          element.scrollTop = element.scrollHeight;
+          i++;
         }
-        element.appendChild(span);
-        element.scrollTop = element.scrollHeight;
-        i++;
+        requestAnimationFrame(step);
       } else {
-        clearInterval(timer);
         element.classList.remove('streaming');
         if (onCompleteCallback) onCompleteCallback();
       }
-    }, 45); // Speed adjustment for smooth reading
+    }
+    
+    requestAnimationFrame(step);
   }
 }
 

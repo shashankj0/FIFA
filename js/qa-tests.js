@@ -70,7 +70,8 @@ class QATestSuite {
       // Artificial delay to simulate real-time analysis
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      const successScore = step.action();
+      // Await step action to support async security audits
+      const successScore = await step.action();
       this.scores[step.scoreKey] = successScore;
       
       // Update DOM
@@ -79,9 +80,9 @@ class QATestSuite {
         scoreElement.textContent = `${successScore}%`;
         // Apply color classes
         if (successScore === 100) {
-          scoreElement.style.color = 'var(--color-primary)';
+          scoreElement.className = 'test-module-value text-primary-color';
         } else {
-          scoreElement.style.color = 'var(--color-accent)';
+          scoreElement.className = 'test-module-value text-accent-color';
         }
       }
 
@@ -111,7 +112,7 @@ class QATestSuite {
       this.log("Unit Test - Simulator Initialization: Failed to retrieve default capacity.", 'failure');
     }
 
-    // Test 2: AI Engine Classifier Check
+    // Test 2: AI Intent Classifier Check
     total++;
     const ai = window.stadiumAIEngine;
     if (ai) {
@@ -255,7 +256,7 @@ class QATestSuite {
 
     // A11y Test 4: Focus Indicator & Keyboard Accessibility
     total++;
-    const interactiveElements = document.querySelectorAll('button, select, input, [onclick]');
+    const interactiveElements = document.querySelectorAll('button, select, input, [onclick], .interactive-map-node');
     let keyboardAccessOk = true;
     
     interactiveElements.forEach(el => {
@@ -263,14 +264,19 @@ class QATestSuite {
       const isFocusableTag = ['BUTTON', 'SELECT', 'INPUT', 'A'].includes(el.tagName);
       const tabIndex = el.getAttribute('tabindex');
       
-      if (!isFocusableTag && !tabIndex && el.getAttribute('onclick')) {
-        keyboardAccessOk = false;
-        this.log(`Accessibility Audit - Tab-Index Check: Non-button node with click handler lacks keyboard access: ${el.tagName}`, 'failure');
+      const isInteractiveMapNode = el.classList.contains('interactive-map-node');
+      const hasOnClickAttr = el.getAttribute('onclick');
+
+      if (!isFocusableTag && (isInteractiveMapNode || hasOnClickAttr)) {
+        if (!tabIndex || tabIndex !== '0') {
+          keyboardAccessOk = false;
+          this.log(`Accessibility Audit - Tab-Index Check: Interactive node lacks tabindex="0" for keyboard access: ${el.tagName}`, 'failure');
+        }
       }
     });
 
     if (keyboardAccessOk) {
-      this.log("Accessibility Audit - Tab-Index Check: All click listeners bound to natively focusable or tabindex tags.", 'success');
+      this.log("Accessibility Audit - Tab-Index Check: All click listeners bound to natively focusable tags or tabindex='0' keyboard focus nodes.", 'success');
       passed++;
     }
 
@@ -280,7 +286,7 @@ class QATestSuite {
   /* ==========================================================================
      MODULE 3: SECURITY AUDIT
      ========================================================================== */
-  runSecurityAudit() {
+  async runSecurityAudit() {
     let passed = 0;
     let total = 0;
 
@@ -289,28 +295,14 @@ class QATestSuite {
     const chatField = document.getElementById('chat-text-field');
     const chatMsgBox = document.getElementById('chat-messages-box');
     
-    if (chatField && chatMsgBox && window.handleChatSubmit) {
+    if (chatField && chatMsgBox) {
       // Simulate input injection payload
       const xssPayload = "<script>alert('XSS')</script>";
-      const origText = chatField.value;
-      
-      chatField.value = xssPayload;
-      // Capture message rendering
-      const originalBubbleCount = chatMsgBox.children.length;
-      
-      // Simulate processing
-      const response = window.stadiumAIEngine.generateResponse(xssPayload, 'en', window.stadiumSimulator.state);
-      
-      // Inject to chat container (using app.js method)
       const userBubble = document.createElement('div');
-      userBubble.className = 'chat-bubble bubble-user';
       userBubble.textContent = xssPayload; // Secure textContent usage
       chatMsgBox.appendChild(userBubble);
 
       const parsedInner = userBubble.innerHTML;
-      
-      // Clean up
-      chatField.value = origText;
       userBubble.remove();
 
       if (parsedInner.includes('&lt;script&gt;')) {
@@ -323,26 +315,96 @@ class QATestSuite {
       this.log("Security Audit - XSS Mitigation: Chat controller inputs missing.", 'failure');
     }
 
-    // Security Test 2: Check for Eval and Function constructor usage
+    // Security Test 2: Code Sandboxing - Real eval & Function constructor usage check
     total++;
+    let evalTestPassed = true;
+    const scriptFiles = ['js/app.js', 'js/ai-engine.js', 'js/simulator.js', 'js/qa-tests.js'];
+    
     try {
-      const testEval = typeof eval === 'function';
-      // In a real sandbox we ensure eval is globally monitored or disabled
-      this.log("Security Audit - Code Sandboxing: No eval() execution used in routing or logic files.", 'success');
-      passed++;
+      // Attempt to fetch script contents and scan for 'eval(' or 'new Function('
+      for (const src of scriptFiles) {
+        const response = await fetch(src);
+        if (response.ok) {
+          const content = await response.text();
+          // Exclude comments when checking for eval to prevent false positives
+          const cleanContent = content.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, '');
+          
+          if (/eval\s*\(/.test(cleanContent) || /new\s+Function/.test(cleanContent) || /Function\s*\(/.test(cleanContent)) {
+            evalTestPassed = false;
+            this.log(`Security Audit - Code Sandboxing: Forbidden code structure (eval or Function constructor) detected in ${src}.`, 'failure');
+            break;
+          }
+        } else {
+          // If response not ok, let it throw to trigger local CORS fallback
+          throw new Error('Script fetch failed');
+        }
+      }
+      
+      // Additional check to make sure global eval hasn't been tampered with or modified
+      if (evalTestPassed) {
+        const nativeString = eval.toString();
+        if (!nativeString.includes('[native code]')) {
+          evalTestPassed = false;
+          this.log("Security Audit - Code Sandboxing: Overridden global eval() detected.", 'failure');
+        }
+      }
     } catch (e) {
-      this.log("Security Audit - Code Sandboxing: Eval statement detected or blocked.", 'failure');
+      // Fallback: If CORS blocks local fetch (e.g. file:// protocol), perform runtime check on global context
+      this.log("Security Audit - Code Sandboxing: Fetch blocked (local file protocol). Performing global runtime sandboxing check...", 'info');
+      const nativeEvalString = eval.toString();
+      const nativeFuncString = Function.toString();
+      
+      if (!nativeEvalString.includes('[native code]') || !nativeFuncString.includes('[native code]')) {
+        evalTestPassed = false;
+        this.log("Security Audit - Code Sandboxing: Global eval or Function constructs appear compromised.", 'failure');
+      }
     }
 
-    // Security Test 3: Safe storage and local State hygiene
-    total++;
-    try {
-      localStorage.setItem('__test_sec__', 'hygiene');
-      localStorage.removeItem('__test_sec__');
-      this.log("Security Audit - State Hygiene: Verified local secure storage handles mock data securely.", 'success');
+    if (evalTestPassed) {
+      this.log("Security Audit - Code Sandboxing: No eval() or unsafe dynamic execution constructors used in runtime scripts.", 'success');
       passed++;
-    } catch(e) {
-      this.log("Security Audit - State Hygiene: State engine execution failed.", 'failure');
+    }
+
+    // Security Test 3: Local Storage Secrets Leak and Input Escaping Check
+    total++;
+    let storagePassed = true;
+    try {
+      // 1. Scan active localStorage keys for credential leakage patterns
+      const sensitiveKeys = ['key', 'password', 'token', 'auth', 'secret', 'credential', 'cert', 'private', 'session'];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i).toLowerCase();
+        if (sensitiveKeys.some(sKey => key.includes(sKey))) {
+          // Verify if it contains something that looks like an actual plain-text secret or key
+          const val = localStorage.getItem(localStorage.key(i));
+          if (val && val.length > 5 && !val.includes('{') && !val.includes('[')) {
+            storagePassed = false;
+            this.log(`Security Audit - State Hygiene: Potential sensitive plain-text key exposed in localStorage: '${localStorage.key(i)}'.`, 'failure');
+            break;
+          }
+        }
+      }
+
+      // 2. Verify storage serialization sanitization
+      if (storagePassed) {
+        const xssTestKey = '__test_sec_hygiene__';
+        const xssVal = '<script>alert(1)</script>';
+        localStorage.setItem(xssTestKey, xssVal);
+        const retrieved = localStorage.getItem(xssTestKey);
+        localStorage.removeItem(xssTestKey);
+        
+        if (retrieved !== xssVal) {
+          storagePassed = false;
+          this.log("Security Audit - State Hygiene: State storage serialization is unstable or compromised.", 'failure');
+        }
+      }
+    } catch (e) {
+      storagePassed = false;
+      this.log(`Security Audit - State Hygiene: Exception during storage audit: ${e.message}`, 'failure');
+    }
+
+    if (storagePassed) {
+      this.log("Security Audit - State Hygiene: Verified local storage contains no plaintext credential leaks and handles strings securely.", 'success');
+      passed++;
     }
 
     return Math.round((passed / total) * 100);
