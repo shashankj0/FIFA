@@ -149,3 +149,17 @@ Ready for tournament kickoff.`;
     window.stadiumAIEngine.streamText(brief, briefingContainer);
   }
 }
+
+/**
+ * Initiates the automated QA diagnostic testing run, temporarily disabling the trigger button.
+ * @returns {void}
+ */
+function runSuiteTests() {
+  if (window.qaTestSuite) {
+    const btn = DOM.btnRunTests || document.getElementById('btn-run-tests');
+    if (btn) btn.disabled = true;
+    window.qaTestSuite.runAll().then(() => {
+      if (btn) btn.disabled = false;
+    });
+  }
+}
