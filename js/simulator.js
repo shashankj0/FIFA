@@ -3,12 +3,31 @@
  * Manages the mock real-time state of MetLife Stadium for the live demo.
  */
 
+/**
+ * Wait time in minutes for Gate C when congested.
+ * @const {number}
+ */
+const GATE_C_CONGESTED_WAIT = 22;
+
+/**
+ * Wait time in minutes for Gate C when resolved.
+ * @const {number}
+ */
+const GATE_C_RESOLVED_WAIT = 5;
+
 class StadiumSimulator {
+  /**
+   * Initializes the simulator state and starts the real-time simulation interval.
+   */
   constructor() {
     this.resetState();
     this.startSimulationLoop();
   }
 
+  /**
+   * Resets the simulator metrics and incidents logs back to default nominal states.
+   * @returns {void}
+   */
   resetState() {
     this.state = {
       occupancy: 74289,
@@ -44,6 +63,10 @@ class StadiumSimulator {
     this.broadcastUpdate();
   }
 
+  /**
+   * Starts a simulation loop interval to periodically fluctuate gate wait times and spectator count.
+   * @returns {void}
+   */
   startSimulationLoop() {
     // Periodically fluctuate values to simulate real live data feeds
     this.intervalId = setInterval(() => {
@@ -68,19 +91,27 @@ class StadiumSimulator {
     }, 6000);
   }
 
+  /**
+   * Halts the simulation interval loop.
+   * @returns {void}
+   */
   stopSimulationLoop() {
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
   }
 
-  // Trigger a new incident on demand
+  /**
+   * Triggers a new incident and logs wait latency offsets onto target gates.
+   * @param {string} type The category trigger selector ('gate-c', 'medical', 'concession').
+   * @returns {object|null} The newly triggered incident details object, or null if duplicate.
+   */
   triggerIncident(type) {
     const id = `inc-${Date.now()}`;
     let newIncident;
 
     if (type === 'gate-c') {
-      this.state.gates['Gate C (South)'].waitTime = 22;
+      this.state.gates['Gate C (South)'].waitTime = GATE_C_CONGESTED_WAIT;
       this.state.gates['Gate C (South)'].status = 'Congested';
       this.state.gates['Gate C (South)'].load = 'High';
       newIncident = {
@@ -126,7 +157,11 @@ class StadiumSimulator {
     return null;
   }
 
-  // AI dispatches a resolution plan
+  /**
+   * Marks a target simulator incident resolved and scales down queue ETA.
+   * @param {string} id The unique identifier of the incident to resolve.
+   * @returns {object|null} The resolved incident details, or null if not found.
+   */
   resolveIncident(id) {
     const incidentIndex = this.state.incidents.findIndex(inc => inc.id === id);
     if (incidentIndex !== -1) {
@@ -140,7 +175,7 @@ class StadiumSimulator {
         this.state.gates['Gate D (West)'].load = 'Low';
         this.state.gates['Gate D (West)'].resolved = true;
       } else if (incident.target === 'Gate C (South)') {
-        this.state.gates['Gate C (South)'].waitTime = 5;
+        this.state.gates['Gate C (South)'].waitTime = GATE_C_RESOLVED_WAIT;
         this.state.gates['Gate C (South)'].status = 'Clear';
         this.state.gates['Gate C (South)'].load = 'Low';
       }
@@ -151,6 +186,10 @@ class StadiumSimulator {
     return null;
   }
 
+  /**
+   * Broadcasts the updated simulator state as a custom browser DOM event.
+   * @returns {void}
+   */
   broadcastUpdate() {
     // Fire a custom DOM event so the UI can listen and refresh itself cleanly
     const event = new CustomEvent('stadiumUpdate', { detail: this.state });

@@ -4,12 +4,24 @@
  * and contextual analysis of current stadium sensor values.
  */
 
+/**
+ * Text streaming interval delay in milliseconds.
+ * @const {number}
+ */
+const STREAM_INTERVAL_MS = 45;
+
 class StadiumAIEngine {
+  /**
+   * Initializes the AI Engine and populates intent translations.
+   */
   constructor() {
     this.initTranslations();
   }
 
-  // Define intent mapping & responses for multilingual simulation
+  /**
+   * Defines and sets up translation dictionaries for fan intent queries.
+   * @returns {void}
+   */
   initTranslations() {
     this.intentResponses = {
       accessibility_entrance: {
@@ -27,14 +39,14 @@ class StadiumAIEngine {
         fr: "🚍 **Transports vers NYC**: Le **Réseau Express Rail** fonctionne normalement avec des départs toutes les 5 minutes et 0 min de retard. La **Navette du Tournoi** vers NYC a un léger retard de 4 minutes. Le covoiturage est à 88% de capacité. Nous vous recommandons le train pour réduire vos émissions.",
         ar: "🚍 **اتصالات النقل إلى نيويورك**: يعمل **قطار السكك الحديدية السريع** بشكل طبيعي برحلات كل 5 دقائق وبدون أي تأخير. تواجه **حافلة البطولة** إلى نيويورك تأخيراً طفيفاً لمدة 4 دقائق. نوصي باستقلال القطار السريع لتقليل الانبعاثات الضارة.",
         de: "🚍 **ÖPNV-Verbindungen nach NYC**: Die **Express-Bahn** verkehrt planmäßig alle 5 Minuten ohne Verspätungen. Der **Turnier-Shuttlebus** nach NYC hat eine geringe Verspätung von 4 Minuten. Fahrgemeinschafts-Parkplätze sind zu 88% belegt. Wir empfehlen die Bahn zur Emissionsminderung.",
-        ja: "🚍 **ニューヨーク方面の交通接続**: **エクスプレス・レール（快速電車）**は5分間隔で通常運行中（遅延なし）です。ニューヨーク行きの**大会シャトルバス**は4分の軽微な遅延が発生しています。相乗り駐車場は現在容量の88%です。排出量削減のため、電車の利用を推奨します。",
-        pt: "🚍 **Conexões de Trânsito para NYC**: O **Trem Expresso** está operando normalmente com partidas a cada 5 minutos e sem atrasos. O **Ônibus Transbordo do Torneio** para NYC tem um pequeno atraso de 4 minutos. O estacionamento está com 88% de capacidade. Recomendamos o Trem Expresso para reduzir emissões."
+        ja: "🚍 **ニューヨーク方面の交通接続**: **エクスプレス・レール（快速電車）**は5分間隔で通常運行中（遅延なし）です。ニューヨーク行きの**大会シャトルバス**は4分の軽微な遅延が発生しています。相乗り駐車場は現在容量 of 88%です。排出量削減のため、電車の利用を推奨します。",
+        pt: "🚍 **Conexões de Trânsito para NYC**: O Trem Expresso está operando normalmente com partidas a cada 5 minutos e sem atrasos. O Ônibus Transbordo do Torneio para NYC tem um pequeno atraso de 4 minutos. O estacionamento está com 88% de capacidade. Recomendamos o Trem Expresso para reduzir emissões."
       },
       sustainable_dining: {
         en: "🌱 **Sustainable & Organic Dining**: MetLife Stadium promotes zero-waste dining. You can order a plant-based burger or organic wrap at the **Concessions Green Hub (Block 105)**. Recycling compostable items here earns you a 20% discount on sustainable merchandise. Every green purchase saves 4.4 kg of CO2 compared to standard concessions.",
         es: "🌱 **Comida Sostenible y Orgánica**: El MetLife Stadium promueve una experiencia sin residuos. Puede pedir una hamburguesa vegana en el **Centro Verde de Concesiones (Bloque 105)**. Reciclar materiales compostables aquí le otorga 20% de descuento en mercadería oficial sostenible.",
         fr: "🌱 **Restauration Durable & Biologique**: Le MetLife Stadium favorise la réduction des déchets. Commandez un burger végétal au **Hub Vert (Bloc 105)**. Recycler vos emballages compostables ici vous permet d'obtenir 20% de réduction sur les produits durables du tournoi.",
-        ar: "🌱 **خيارات طعام مستدامة وعضوية**: يروج استاد ميتلايف للأطعمة الخالية من النفايات. يمكنك طلب برجر نباتي أو لفائف عضوية من **مركز التنازلات الأخضر (قسم 105)**. تدوير المواد القابلة للتسميد هنا يمنحك خصماً بنسبة 20% على البضائع المستدامة.",
+        ar: "🌱 **خيارات طعام مستدامة وعضوية**: يروج استاد ميتلايف للأطعمة القابلة للتدوير والنفايات الصفرية. يمكنك طلب برجر نباتي أو لفائف عضوية من **مركز التنازلات الأخضر (قسم 105)**. تدوير المواد القابلة للتسميد هنا يمنحك خصماً بنسبة 20% على البضائع المستدامة.",
         de: "🌱 **Nachhaltige & Bio-Gastronomie**: Das MetLife Stadium fördert Zero-Waste-Gastronomie. Bestellen Sie einen pflanzlichen Burger am **Green Hub Stand (Block 105)**. Das Recyceln kompostierbarer Behälter bringt Ihnen 20% Rabatt auf nachhaltige Fanartikel.",
         ja: "🌱 **サステナブルフード＆オーガニックダイニング**: メットライフ・スタジアムではゼロ・ウェイストを推進しています。**グリーン・コンセッション・ハブ（105ブロック）**で植物由来のバーガーやオーガニックラップをご注文いただけます。生分解性容器をリサイクルするとサステナブルグッズが20%割引になります。",
         pt: "🌱 **Gastronomia Sustentável e Orgânica**: O MetLife Stadium promove alimentação com desperdício zero. Peça um hambúrguer vegetal no **Hub Verde de Concessões (Bloco 105)**. Reciclar itens compostáveis garante 20% de desconto em mercadorias sustentáveis."
@@ -43,7 +55,7 @@ class StadiumAIEngine {
         en: "⚽ **FIFA World Cup 2026 Assistant**: I can answer questions about match updates, seat blocks, toilet locations, safety regulations, and environmental features. Feel free to ask details such as 'Where is Medical Station 2?' or 'How congested is Gate D right now?'",
         es: "⚽ **Asistente de la Copa Mundial 2026**: Puedo responder sobre actualizaciones de partidos, asientos, baños, seguridad y medio ambiente. Pregunte detalles como '¿Dónde está la estación médica 2?' o '¿Qué tan congestionada está la Puerta D?'",
         fr: "⚽ **Assistant de la Coupe du Monde 2026**: Je peux répondre à vos questions sur les matchs, les blocs de sièges, les toilettes, la sécurité et l'environnement. Demandez-moi par exemple: 'Où est le poste médical 2?' ou 'Quel est l'attente à la porte D?'",
-        ar: "⚽ **مساعد كأس العالم 2026**: يمكنني الإجابة على الأسئلة المتعلقة بآخر مباريات البطولة، مواقع المقاعد، دورات المياه، لوائح السلامة، والميزات البيئica. اسألني عن 'أين تقع المحطة الطبية 2؟' أو 'ما مدى ازدحام البوابة D الآن؟'",
+        ar: "⚽ **مساعد كأس العالم 2026**: يمكنني الإجابة على الأسئلة المتعلقة بآخر مباريات البطولة، مواقع المقاعد، دورات المياه، لوائح السلامة، والميزات البيئية. اسألني عن 'أين تقع المحطة الطبية 2؟' أو 'ما مدى ازدحام البوابة D الآن؟'",
         de: "⚽ **FIFA WM 2026 Assistent**: Ich beantworte Fragen zu Spielständen, Sitzblöcken, Toiletten, Sicherheitsregeln und Umweltthemen. Fragen Sie mich z. B. 'Wo ist die Sanitätsstation 2?' oder 'Wie voll ist Tor D zur Zeit?'",
         ja: "⚽ **FIFAワールドカップ2026 アシスタント**: 試合速報、座席エリア、トイレの場所、安全規則、エコの取り組みについてお答えします。「救護所2はどこですか？」や「現在ゲートDはどのくらい混雑していますか？」などお気軽にお尋ねください。",
         pt: "⚽ **Assistente da Copa do Mundo FIFA 2026**: Posso responder a perguntas sobre atualizações de jogos, blocos de assentos, banheiros, regulamentos de segurança e ecologia. Pergunte-me 'Onde fica o Posto Médico 2?' ou 'Quão congestionado está o Portão D?'"
@@ -51,7 +63,11 @@ class StadiumAIEngine {
     };
   }
 
-  // Classifies user query into pre-defined intents using keywords
+  /**
+   * Classifies user query into pre-defined intents using keywords.
+   * @param {string} query The user input query string.
+   * @returns {string} The matched intent classification key.
+   */
   classifyIntent(query) {
     const q = query.toLowerCase();
     
@@ -68,10 +84,11 @@ class StadiumAIEngine {
   }
 
   /**
-   * Generates dynamic AI response combining intent template and current simulator context values
-   * @param {string} userQuery The string sent by user
-   * @param {string} lang Target language code ('en', 'es', etc.)
-   * @param {object} simulatorState Current state of the StadiumSimulator
+   * Generates dynamic AI response combining intent template and current simulator context values.
+   * @param {string} userQuery The query sent by user.
+   * @param {string} lang Target language code ('en', 'es', etc.).
+   * @param {object} simulatorState Current state of the StadiumSimulator.
+   * @returns {string} Fully formulated context-injected AI response.
    */
   generateResponse(userQuery, lang = 'en', simulatorState = {}) {
     const intent = this.classifyIntent(userQuery);
@@ -104,7 +121,7 @@ class StadiumAIEngine {
         fr: `\n\n🏥 **Premiers secours**: Le poste médical 2 est opérationnel sur le **Hall 1 près de la porte D**. En cas d'urgence absolue, veuillez interpeller le bénévole FIFA le plus proche ou appuyer sur le bouton d'assistance rouge.`,
         ar: `\n\n🏥 **الاستجابة للإسعافات الأولية**: المحطة الطبية 2 تعمل بكامل طاقتها في **البهو 1 بالقرب من البوابة D**. يمكنك العثور على مسعفين هناك. إذا كانت هذه حالة طارئة، يرجى إبلاغ أقرب متطوع أو الضغط على زر المساعدة الأحمر.`,
         de: `\n\n🏥 **Erste Hilfe**: Die Sanitätsstation 2 ist im **Korridor 1 nahe Tor D** voll besetzt. Wenn ein akuter Notfall vorliegt, sprechen Sie bitte sofort einen FIFA-Helfer in Leuchtkleidung an oder nutzen Sie den Notruf-Knopf.`,
-        ja: `\n\n🏥 **救護対応**: 救護所2は**ゲートD近くのコンコース1**で稼働中です。救急救命士が常駐しています。緊急の場合は、黄色の高視認性ベストを着用したお近くのFIFAボランティアを呼ぶか、緊急アシストボタンを押してください。`,
+        ja: `\n\n🏥 **救護対応**: 救護所2は**ゲートD近く of コンコース1**で稼働中です。救急救命士が常駐しています。緊急の場合は、黄色の高視認性ベストを着用したお近くのFIFAボランティアを呼ぶか、緊急アシストボタンを押してください。`,
         pt: `\n\n pt 🏥 **Primeiros Socorros**: O Posto Médico 2 está funcionando no **Corredor 1 perto do Portão D**. Existem paramédicos certificados. Em caso de emergência, avise o voluntário FIFA mais próximo.`
       };
       baseResponse += (medicalContext[lang] || medicalContext['en']);
@@ -113,7 +130,12 @@ class StadiumAIEngine {
     return baseResponse;
   }
 
-  // Generates AI Tactical briefing for Operations Center (Staff Mode)
+  /**
+   * Generates AI Tactical briefing responses for the Staff command operations dashboard.
+   * @param {string} incidentTarget Target area location.
+   * @param {object} simulatorState Current state of the StadiumSimulator.
+   * @returns {string} Operations directive briefing.
+   */
   generateTacticalResponse(incidentTarget, simulatorState) {
     if (incidentTarget === 'Gate D (West)') {
       return `📊 **AI Tactical Dispatch (Gate D Congestion)**:
@@ -146,21 +168,26 @@ Estimated time to relieve: **8 minutes** under current dispatch guidelines.`;
     return "System status is nominal. No tactical dispatch overrides required.";
   }
 
-  // Dynamic text streaming into a target element with word-by-word delays using requestAnimationFrame
+  /**
+   * Meters out dynamic text output word-by-word onto HTML elements.
+   * @param {string} text Target briefing text content.
+   * @param {HTMLElement} element HTML element target insertion block.
+   * @param {function} [onCompleteCallback] Callback executed after stream concludes.
+   * @returns {void}
+   */
   streamText(text, element, onCompleteCallback) {
     element.innerHTML = "";
     element.classList.add('streaming');
     
     const words = text.split(" ");
     let i = 0;
-    const interval = 45; // ms speed adjustment for smooth reading
     let lastTime = performance.now();
     
     function step(timestamp) {
       if (i < words.length) {
         const elapsed = timestamp - lastTime;
-        if (elapsed >= interval) {
-          lastTime = timestamp - (elapsed % interval);
+        if (elapsed >= STREAM_INTERVAL_MS) {
+          lastTime = timestamp - (elapsed % STREAM_INTERVAL_MS);
           
           // Safe text appending to prevent XSS
           const span = document.createElement('span');
