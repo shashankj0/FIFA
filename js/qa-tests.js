@@ -65,51 +65,6 @@ class QATestSuite {
     logBox.scrollTop = logBox.scrollHeight;
   }
 
-  /**
-   * Parses the text content of a JavaScript file to extract all template literal block strings
-   * assigned to .innerHTML properties, handling nested braces and inner backticks.
-   * @param {string} content The file source content.
-   * @returns {string[]} An array of extracted innerHTML template literal blocks.
-   */
-  getInnerHTMLBlocks(content) {
-    const blocks = [];
-    let index = 0;
-    while ((index = content.indexOf('.innerHTML', index)) !== -1) {
-      // Find start of assignment (backtick)
-      const startBacktick = content.indexOf('`', index);
-      if (startBacktick !== -1) {
-        let braceCount = 0;
-        let inInterpolation = false;
-        let closingBacktick = -1;
-        for (let i = startBacktick + 1; i < content.length; i++) {
-          const char = content[i];
-          const nextChar = content[i+1];
-          if (inInterpolation) {
-            if (char === '}') braceCount--;
-            if (braceCount === 0) inInterpolation = false;
-          } else {
-            if (char === '$' && nextChar === '{') {
-              braceCount++;
-              inInterpolation = true;
-              i++; // skip '{'
-            } else if (char === '`') {
-              closingBacktick = i;
-              break;
-            }
-          }
-        }
-        if (closingBacktick !== -1) {
-          blocks.push(content.substring(startBacktick, closingBacktick + 1));
-          index = closingBacktick + 1;
-        } else {
-          index += 10;
-        }
-      } else {
-        index += 10;
-      }
-    }
-    return blocks;
-  }
 
   /**
    * Core orchestrator executing the 4 diagnostic audit steps.
@@ -549,14 +504,15 @@ class QATestSuite {
       userBubble.textContent = xssPayload; // Secure textContent usage
       chatMsgBox.appendChild(userBubble);
 
-      const parsedInner = userBubble.innerHTML;
+      const safeText = userBubble.textContent;
+      const parsedElCount = userBubble.children.length;
       userBubble.remove();
 
-      if (parsedInner.includes('&lt;script&gt;')) {
+      if (safeText === xssPayload && parsedElCount === 0) {
         this.log("Security Audit - XSS Mitigation: Text inputs correctly escaped using textContent node insertion.", 'success');
         passed++;
       } else {
-        this.log(`Security Audit - XSS Mitigation: Script element not escaped in DOM. Got: ${parsedInner}`, 'failure');
+        this.log(`Security Audit - XSS Mitigation: Script element parsed as HTML element in DOM. Element count: ${parsedElCount}`, 'failure');
       }
     } else {
       this.log("Security Audit - XSS Mitigation: Chat controller inputs missing.", 'failure');
@@ -670,33 +626,14 @@ class QATestSuite {
     let xssScanPassed = true;
     try {
       for (const src of scriptFiles) {
+        if (src === 'js/qa-tests.js') continue;
         const response = await fetch(src);
         if (response.ok) {
           const content = await response.text();
-          // Extract entire outer template literals assigned to innerHTML using custom brace parser
-          const blocks = this.getInnerHTMLBlocks(content);
-          
-          for (const block of blocks) {
-            // Extract all interpolations ${...}
-            const interpolationRegex = /\$\{([\s\S]*?)\}/g;
-            let interMatch;
-            while ((interMatch = interpolationRegex.exec(block)) !== null) {
-              const variable = interMatch[1].trim();
-              
-              // Validate that the variable is completely wrapped by escapeHTML(...)
-              // or is a whitelisted safe layout property, number, or ternary operator
-              const isSafe = variable === 'badgeClass' || 
-                             variable === 'badgeLabel' || 
-                             variable === 'inc.aiResolved' ||
-                             variable.includes('?') || 
-                             !isNaN(variable) || 
-                             /^escapeHTML\([^)]*\)$/.test(variable);
-                             
-              if (!isSafe) {
-                xssScanPassed = false;
-                this.log(`Security Audit - XSS Check: Unescaped variable '${variable}' inside innerHTML assignment in ${src}.`, 'failure');
-              }
-            }
+          // Verify that .innerHTML is not used in application files
+          if (content.includes('.innerHTML') || content.includes('innerHTML')) {
+            xssScanPassed = false;
+            this.log(`Security Audit - XSS Check: Forbidden innerHTML usage detected in ${src}.`, 'failure');
           }
         }
       }
