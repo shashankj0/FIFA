@@ -1049,3 +1049,38 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
 }
 
+/* High-Contrast accessibility color compliance overrides */
+body.high-contrast .btn-primary {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #000000 !important;
+}
+
+body.high-contrast .btn-primary:hover {
+  background-color: #333333 !important;
+  border-color: #333333 !important;
+}
+
+body.high-contrast .mode-toggle-btn.active {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+body.high-contrast .badge {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #000000 !important;
+}
+
+body.high-contrast .prompt-chip {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+}
+
+body.high-contrast .prompt-chip:hover {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+

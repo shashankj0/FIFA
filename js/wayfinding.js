@@ -42,6 +42,28 @@ function selectMapNode(nodeName) {
 }
 
 /**
+ * Safely parses and renders basic markdown bold tags (**) into an HTML element using secure DOM APIs.
+ * @param {string} text The raw text content containing optional markdown bold blocks.
+ * @param {HTMLElement} element The target container element.
+ * @returns {void}
+ */
+function safeRenderMarkdownBold(text, element) {
+  if (!element) return;
+  element.replaceChildren();
+  
+  const parts = text.split('**');
+  parts.forEach((part, index) => {
+    if (index % 2 === 1) {
+      const strong = document.createElement('strong');
+      strong.textContent = part;
+      element.appendChild(strong);
+    } else {
+      element.appendChild(document.createTextNode(part));
+    }
+  });
+}
+
+/**
  * Derives routing directions, walking metrics, and triggers Bezier path overlays on the SVG map.
  * @returns {{directions: string, eta: number, distance: number}|null} Routing solution details, or null if coordinates are missing.
  */
@@ -94,7 +116,7 @@ function calculateRoute() {
 
   // Update UI Panels using classes instead of inline style
   if (DOM.routeResultPanel) DOM.routeResultPanel.classList.remove('hidden');
-  if (DOM.routeDirections) DOM.routeDirections.textContent = routeDirections;
+  if (DOM.routeDirections) safeRenderMarkdownBold(routeDirections, DOM.routeDirections);
   if (DOM.routeEta) DOM.routeEta.textContent = `${etaMinutes} min`;
   if (DOM.routeDistance) DOM.routeDistance.textContent = `${distanceFeet} ft`;
   

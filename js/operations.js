@@ -42,10 +42,13 @@ function updateDashboardUI(state) {
   // Update operations list element
   const alertFeed = DOM.alertsFeed || document.getElementById('operations-alerts-feed');
   if (alertFeed) {
-    alertFeed.innerHTML = '';
+    alertFeed.replaceChildren();
     
     if (state.incidents.length === 0) {
-      alertFeed.innerHTML = `<div class="metric-subtext text-center">No active incidents registered. Nominal state.</div>`;
+      const div = document.createElement('div');
+      div.className = 'metric-subtext text-center';
+      div.textContent = 'No active incidents registered. Nominal state.';
+      alertFeed.appendChild(div);
     } else {
       state.incidents.forEach(inc => {
         const row = document.createElement('div');
@@ -58,18 +61,43 @@ function updateDashboardUI(state) {
         const badgeClass = inc.level === 'critical' ? 'alert-badge-critical' : 'alert-badge-warning';
         const badgeLabel = inc.aiResolved ? 'RESOLVED' : inc.level.toUpperCase();
         
-        row.innerHTML = `
-          <div>
-            <span class="badge ${badgeClass}">${badgeLabel}</span>
-            <strong>${escapeHTML(inc.title)}</strong>: ${escapeHTML(inc.description)} <small class="metric-subtext display-block mt-2">Logged at: ${escapeHTML(inc.timestamp)}</small>
-          </div>
-          <div>
-            ${!inc.aiResolved 
-              ? `<button class="btn btn-secondary" data-action="resolve-incident" data-incident-id="${escapeHTML(inc.id)}" data-target-area="${escapeHTML(inc.target)}">AI Resolve Plan</button>` 
-              : `<span class="text-primary-color font-bold-700">🟢 Dispatched</span>`
-            }
-          </div>
-        `;
+        const infoDiv = document.createElement('div');
+        
+        const badgeSpan = document.createElement('span');
+        badgeSpan.className = `badge ${badgeClass}`;
+        badgeSpan.textContent = badgeLabel;
+        infoDiv.appendChild(badgeSpan);
+        
+        const strongEl = document.createElement('strong');
+        strongEl.textContent = inc.title;
+        infoDiv.appendChild(strongEl);
+        
+        infoDiv.appendChild(document.createTextNode(`: ${inc.description} `));
+        
+        const smallEl = document.createElement('small');
+        smallEl.className = 'metric-subtext display-block mt-2';
+        smallEl.textContent = `Logged at: ${inc.timestamp}`;
+        infoDiv.appendChild(smallEl);
+        
+        row.appendChild(infoDiv);
+        
+        const actionDiv = document.createElement('div');
+        if (!inc.aiResolved) {
+          const button = document.createElement('button');
+          button.className = 'btn btn-secondary';
+          button.setAttribute('data-action', 'resolve-incident');
+          button.setAttribute('data-incident-id', inc.id);
+          button.setAttribute('data-target-area', inc.target);
+          button.textContent = 'AI Resolve Plan';
+          actionDiv.appendChild(button);
+        } else {
+          const span = document.createElement('span');
+          span.className = 'text-primary-color font-bold-700';
+          span.textContent = '🟢 Dispatched';
+          actionDiv.appendChild(span);
+        }
+        row.appendChild(actionDiv);
+        
         alertFeed.appendChild(row);
       });
     }

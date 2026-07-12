@@ -211,7 +211,7 @@ Estimated time to relieve: **8 minutes** under current dispatch guidelines.`;
    * @returns {void}
    */
   streamText(text, element, onCompleteCallback) {
-    element.innerHTML = "";
+    element.replaceChildren();
     element.classList.add('streaming');
     
     const words = text.split(" ");

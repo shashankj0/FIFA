@@ -227,7 +227,7 @@ function updateSidebarNav(links) {
   const navContainer = document.getElementById('navigation-links');
   if (!navContainer) return;
   
-  navContainer.innerHTML = '';
+  navContainer.replaceChildren();
   links.forEach(link => {
     const li = document.createElement('li');
     const button = document.createElement('button');
@@ -287,7 +287,11 @@ function checkModuleLoadState() {
   if (!window.qaTestSuite || !window.stadiumSimulator || !window.stadiumAIEngine) {
     const logBox = DOM.testResultsBox || document.getElementById('test-results-box');
     if (logBox) {
-      logBox.innerHTML = `<div class="test-log-line test-failure">❌ ERROR: Core diagnostic components failed to load (404 Not Found or file path error). Please verify that the 'js/' folder is accessible and files exist.</div>`;
+      logBox.replaceChildren();
+      const div = document.createElement('div');
+      div.className = 'test-log-line test-failure';
+      div.textContent = '❌ ERROR: Core diagnostic components failed to load (404 Not Found or file path error). Please verify that the \'js/\' folder is accessible and files exist.';
+      logBox.appendChild(div);
     }
   }
 }

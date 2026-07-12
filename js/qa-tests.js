@@ -55,7 +55,7 @@ class QATestSuite {
     const logBox = document.getElementById('test-results-box');
     if (!logBox) return;
 
-    logBox.innerHTML = '';
+    logBox.replaceChildren();
     this.resultsLog.forEach(line => {
       const div = document.createElement('div');
       div.className = `test-log-line ${line.cssClass}`;
