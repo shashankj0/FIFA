@@ -73,13 +73,46 @@ class StadiumAIEngine {
   classifyIntent(query) {
     const q = query.toLowerCase();
     
-    if (q.includes('wheelchair') || q.includes('accessible') || q.includes('accessibility') || q.includes('ramp') || q.includes('sensory') || q.includes('blind') || q.includes('disabled') || q.includes('ada')) {
+    // Accessibility POI keywords in multiple languages (EN, ES, FR, AR, DE, JA, PT)
+    const accessibilityTerms = [
+      'wheelchair', 'accessible', 'accessibility', 'ramp', 'sensory', 'blind', 'disabled', 'ada',
+      'silla de ruedas', 'accesible', 'accesibilidad', 'rampa', 'sensorial', 'ciego', 'discapacitado',
+      'fauteuil roulant', 'accessibilité', 'rampe', 'sensoriel', 'aveugle', 'handicap',
+      'كرسي متحرك', 'إمكانية الوصول', 'منحدر', 'حسي', 'أعمى', 'معاق',
+      'rollstuhl', 'barrierefrei', 'zugänglichkeit', 'rampe', 'sensorisch', 'blind', 'behindert',
+      '車椅子', '車いす', 'バリアフリー', 'アクセシビリティ', 'スロープ', 'センサリー', '障害',
+      'cadeira de rodas', 'acessível', 'acessibilidade', 'rampa', 'deficiente'
+    ];
+    
+    // Transit POI keywords in multiple languages
+    const transitTerms = [
+      'transit', 'shuttle', 'rail', 'train', 'bus', 'nyc', 'carpool', 'parking',
+      'tránsito', 'transporte', 'lanzadera', 'tren', 'autobús', 'auto compartido', 'estacionamiento',
+      'navette', 'covoiturage', 'stationnement',
+      'نقل', 'حافلة', 'قطار', 'سكة حديد', 'موقف',
+      'bahn', 'zug', 'fahrgemeinschaft', 'parken', 'parkplatz',
+      '交通', 'シャトル', '電車', '列車', 'バス', '相乗り', '駐車場',
+      'trânsito', 'traslado', 'trem', 'ônibus', 'carona'
+    ];
+    
+    // Sustainable Concessions keywords in multiple languages
+    const sustainableTerms = [
+      'organic', 'sustainable', 'concessions', 'carbon', 'food', 'burger', 'vegan', 'plant-based', 'recycle', 'emissions',
+      'orgánico', 'sostenible', 'comida', 'hamburguesa', 'vegano', 'vegetariano', 'reciclar', 'emisiones',
+      'biologique', 'durable', 'nourriture', 'végétalien', 'végétarien', 'recycler',
+      'عضوي', 'مستدام', 'طعام', 'برجر', 'نباتي', 'إعادة تدوير', 'انبعاثات',
+      'bio', 'ökologisch', 'nachhaltig', 'essen', 'vegetarisch', 'recypeln', 'emissionen',
+      'オーガニック', 'サステナブル', '有機', '炭素', 'フード', 'バーガー', 'ビーガン', 'ヴィーガン', '植物由来', 'リサイクル', '排出量',
+      'orgânico', 'sustentável', 'hambúrguer', 'emissões'
+    ];
+
+    if (accessibilityTerms.some(term => q.includes(term))) {
       return 'accessibility_entrance';
     }
-    if (q.includes('transit') || q.includes('shuttle') || q.includes('rail') || q.includes('train') || q.includes('bus') || q.includes('nyc') || q.includes('carpool') || q.includes('parking')) {
+    if (transitTerms.some(term => q.includes(term))) {
       return 'nyc_transit';
     }
-    if (q.includes('organic') || q.includes('sustainable') || q.includes('concessions') || q.includes('carbon') || q.includes('food') || q.includes('burger') || q.includes('vegan') || q.includes('plant-based') || q.includes('recycle') || q.includes('emissions')) {
+    if (sustainableTerms.some(term => q.includes(term))) {
       return 'sustainable_dining';
     }
     return 'general_help';
@@ -124,7 +157,7 @@ class StadiumAIEngine {
         ar: `\n\n🏥 **الاستجابة للإسعافات الأولية**: المحطة الطبية 2 تعمل بكامل طاقتها في **البهو 1 بالقرب من البوابة D**. يمكنك العثور على مسعفين هناك. إذا كانت هذه حالة طارئة، يرجى إبلاغ أقرب متطوع أو الضغط على زر المساعدة الأحمر.`,
         de: `\n\n🏥 **Erste Hilfe**: Die Sanitätsstation 2 ist im **Korridor 1 nahe Tor D** voll besetzt. Wenn ein akuter Notfall vorliegt, sprechen Sie bitte sofort einen FIFA-Helfer in Leuchtkleidung an oder nutzen Sie den Notruf-Knopf.`,
         ja: `\n\n🏥 **救護対応**: 救護所2は**ゲートD近く of コンコース1**で稼働中です。救急救命士が常駐しています。緊急の場合は、黄色の高視認性ベストを着用したお近くのFIFAボランティアを呼ぶか、緊急アシストボタンを押してください。`,
-        pt: `\n\n pt 🏥 **Primeiros Socorros**: O Posto Médico 2 está funcionando no **Corredor 1 perto do Portão D**. Existem paramédicos certificados. Em caso de emergência, avise o voluntário FIFA mais próximo.`
+        pt: `\n\n🏥 **Primeiros Socorros**: O Posto Médico 2 está funcionando no **Corredor 1 perto do Portão D**. Existem paramédicos certificados. Em caso de emergência, avise o voluntário FIFA mais próximo.`
       };
       baseResponse += (medicalContext[lang] || medicalContext['en']);
     }

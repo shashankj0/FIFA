@@ -6,6 +6,7 @@
 
 "use strict";
 
+
 /**
  * Updates operations dashboard metric fields and active incidents list.
  * @param {object} state The current live state of the StadiumSimulator.
@@ -65,7 +66,7 @@ function updateDashboardUI(state) {
           <div>
             ${!inc.aiResolved 
               ? `<button class="btn btn-secondary" data-action="resolve-incident" data-incident-id="${escapeHTML(inc.id)}" data-target-area="${escapeHTML(inc.target)}">AI Resolve Plan</button>` 
-              : `<span class="text-primary-color font-bold">🟢 Dispatched</span>`
+              : `<span class="text-primary-color font-bold-700">🟢 Dispatched</span>`
             }
           </div>
         `;
@@ -173,3 +174,4 @@ window.simulateIncidentResponse = simulateIncidentResponse;
 window.resetSimulatorData = resetSimulatorData;
 window.requestTacticalBriefing = requestTacticalBriefing;
 window.runSuiteTests = runSuiteTests;
+

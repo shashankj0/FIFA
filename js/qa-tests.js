@@ -1,10 +1,11 @@
-"use strict";
-
 /**
  * ArenaMind 2026 - Automated QA Testing & Audit Suite
  * Provides in-browser validation for unit tests, accessibility standards,
  * security configurations, and performance metrics.
  */
+
+"use strict";
+
 
 class QATestSuite {
   /**
@@ -786,3 +787,4 @@ class QATestSuite {
 // Instantiate test suite globally
 window.QATestSuite = QATestSuite;
 window.qaTestSuite = new QATestSuite();
+

@@ -1034,3 +1034,18 @@ h1, h2, h3, h4, h5, h6 {
   opacity: 0.6;
   border-left: 4px solid var(--color-primary) !important;
 }
+
+/* Helper utility classes to support strict CSP without inline styles */
+.text-center {
+  text-align: center;
+}
+.display-block {
+  display: block;
+}
+.mt-2 {
+  margin-top: 2px;
+}
+.font-bold-700 {
+  font-weight: 700;
+}
+
