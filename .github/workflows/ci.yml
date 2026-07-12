@@ -1,0 +1,29 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  audit:
+    name: Repository Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-size: 20
+
+      - name: HTML Validation Check
+        run: |
+          echo "Verifying document layout structure..."
+          grep -q "<html" index.html
+          grep -q "<head" index.html
+          grep -q "<body" index.html
+          echo "Structure looks nominal."

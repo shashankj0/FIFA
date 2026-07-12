@@ -1083,4 +1083,23 @@ body.high-contrast .prompt-chip:hover {
   color: #ffffff !important;
 }
 
+/* Accessible prefers-reduced-motion overrides */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-delay: -1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    background-attachment: scroll !important;
+    scroll-behavior: auto !important;
+    transition-delay: 0s !important;
+    transition-duration: 0s !important;
+  }
+  
+  /* Stop SVG animations */
+  svg animate, svg animateTransform, svg animateMotion {
+    display: none !important;
+  }
+}
+
+
 

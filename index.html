@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; frame-ancestors 'none';">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
   <meta name="description" content="ArenaMind 2026: The Generative AI Enabled Stadium Commander and Fan Experience Hub for the FIFA World Cup 2026. Optimize operations and routing.">
   <meta name="keywords" content="FIFA, World Cup 2026, GenAI, Stadium Operations, Wayfinding, Accessibility, Crowd Management, Carbon Footprint">
   <meta name="author" content="Antigravity Coding Assistant">
@@ -77,16 +80,16 @@
       <!-- ACCESSIBILITY CONTROL PANEL (Top of Viewport) -->
       <section class="accessibility-bar" aria-label="Accessibility & Preferences">
         <span class="acc-title">♿ Accessibility Preferences:</span>
-        <button id="btn-contrast-toggle" class="btn btn-secondary">
+        <button id="btn-contrast-toggle" class="btn btn-secondary" aria-label="Toggle high contrast mode">
           🌗 High Contrast Mode
         </button>
-        <button id="btn-text-scale-inc" class="btn btn-secondary">
+        <button id="btn-text-scale-inc" class="btn btn-secondary" aria-label="Increase text size">
           ➕ Increase Text Size
         </button>
-        <button id="btn-text-scale-dec" class="btn btn-secondary">
+        <button id="btn-text-scale-dec" class="btn btn-secondary" aria-label="Decrease text size">
           ➖ Decrease Text Size
         </button>
-        <button id="btn-speech-toggle" class="btn btn-secondary">
+        <button id="btn-speech-toggle" class="btn btn-secondary" aria-label="Toggle text to speech support">
           🔊 Text-to-Speech (Off)
         </button>
       </section>
@@ -104,7 +107,8 @@
             </div>
             
             <div class="map-canvas-container">
-              <svg class="map-svg" viewBox="0 0 800 500" aria-label="Stadium seating plan and points of interest">
+              <svg class="map-svg" viewBox="0 0 800 500" role="img" aria-labelledby="map-title" aria-label="Stadium seating plan and points of interest">
+                <title id="map-title">Stadium seating plan and interactive gate mapping</title>
                 <defs>
                   <radialGradient id="field-glow" cx="50%" cy="50%" r="50%">
                     <stop offset="0%" stop-color="#10b981" stop-opacity="0.3"></stop>

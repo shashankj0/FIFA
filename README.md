@@ -4,90 +4,161 @@ A high-performance, accessible, and secure digital platform built for **MetLife 
 
 ---
 
-## ⚽ Chosen Vertical
+## 🏗️ Architecture & Component Design
 
-**Vertical: Smart Stadium Venue Operations & Fan Experience**
-- **Target Venue**: MetLife Stadium, configured for FIFA World Cup matches (82,500 seating capacity).
-- **Core Goal**: Enhance venue management efficiency (crowd ingress, peak gate wait-time monitoring, security response dispatching) while simultaneously providing fans with step-free accessibility-preferred wayfinding maps, carbon impact tracking, and a translation-capable GenAI concierge.
-
----
-
-## 🛠️ Architecture & Design Approach
-
-The codebase has been refactored under strict production-grade web guidelines:
-
-### 1. Separation of Concerns & Modular Architecture (Code Quality)
-The JavaScript logic has been refactored and decoupled from a single monolithic structure into **7 domain-specific modules** loaded sequentially in `index.html`:
-- **`js/dom-cache.js`**: Declares and populates the global `DOM` cached element reference selectors to eliminate repeated DOM query overhead.
-- **`js/accessibility.js`**: Governs contrast theme toggles, font scaling utilities, text-to-speech helpers, and screen reader announcements.
-- **`js/wayfinding.js`**: Coordinates SVG gate mapping, active node selections, and Bezier route calculations.
-- **`js/chat.js`**: Executes recommended prompt quick chips and manual chatbot query dialogs.
-- **`js/sustainability.js`**: Calculates matchday carbon footprint metrics using transportation and concession variables, categorized by constants.
-- **`js/operations.js`**: Updates operations console queues and lists, triggering mock simulator incidents.
-- **`js/app.js`**: Coordinates state, binds dynamic page event listeners at load, and orchestrates portal switches.
-
-Every top-level function across all `.js` scripts is documented using standard **JSDoc blocks** mapping parameter types and returns. Magic numbers/strings have been extracted to constants (e.g. `GATE_C_CONGESTED_WAIT`, `GATE_C_RESOLVED_WAIT` in `simulator.js`, `CARBON_TIER_THRESHOLDS` in `sustainability.js`, and `STREAM_INTERVAL_MS` in `ai-engine.js`).
-
-### 2. High-Performance Text Rendering (Efficiency)
-- **rAF Metered Loops**: Text-streaming logic inside `ai-engine.js` has been converted from a heavy `setInterval` timer to a `requestAnimationFrame` delta-time loop. This aligns writing execution frame rates directly with browser refresh cycles, eliminating layout thrashing and CPU spikes.
-
-### 3. Accessible Interactive Maps (WCAG 2.1 Compliance)
-- **Keyboard Wayfinding**: Added programmatic event hooks tracking `Enter` and `Space` key presses on all SVG gate and facility group elements (`.interactive-map-node`), making wayfinding controls completely keyboard-operable.
-- **Landmarking**: Added explicit landmark roles (`role="banner"`, `role="main"`, etc.), labels matching inputs (`label[for]`), and unique DOM identifier constraints.
-
-### 4. Defense-in-Depth Auditing (Security)
-- **XSS Sanitization**: Dynamic HTML markup additions (such as simulator alerts or messages) are automatically sanitized using a global `escapeHTML` helper to encode text structures before `.innerHTML` insertion.
-- **Content-Security-Policy (CSP)**: Added a strict CSP meta tag to the document head to block unauthorized inline script injections at the browser level.
-- **Active Static Scan Audits (Hardened)**: The security diagnostic suite fetches runtime scripts and scans for forbidden executions (`eval`/`Function`) and verifies that *all* dynamic variables inside innerHTML templates are fully wrapped in `escapeHTML()` (blocked by regex check `^escapeHTML\([^)]*\)$` if any raw concatenated parts exist).
-- **State Hygiene Audit**: Scans `localStorage` keys for unencrypted plaintext credential leaks.
-- **CSP Protection Audit**: Verifies that the CSP meta tag exists in the document and contains the `default-src` directive.
-
----
-
-## 🚀 How the Solution Works
-
-### Solution Diagram
 ```
-[index.html Page Load]
-         │
-         ▼
-[DOM Caching & Listener Binding]
-         │
-         ▼
-[Check Module Load State]
-         │
-         ▼
-  [Portal Selector]
-   ├──► Fan Mode  ──► Stadium Navigation Map & Route Bezier Curve
-   │              ──► Carbon Footprint Calculator
-   │              ──► GenAI Concierge Chatbot
-   │
-   └──► Staff Mode ──► Operations Dashboard Metric Analytics
-                   ──► Mock Incident Dispatcher
-         │
-         ▼
-  [QA Testing Center] ──► In-browser Unit, Accessibility, Security & Performance Profiler
+                   +-----------------------+
+                   |      index.html       |
+                   |   (DOM View & CSP)    |
+                   +-----------+-----------+
+                               |
+            +------------------+------------------+
+            |                  |                  |
+            ▼                  ▼                  ▼
+   +-----------------+ +-----------------+ +-----------------+
+   |   js/app.js     | |  js/dom-cache.js  | |  js/qa-tests.js |
+   | (Controller/    | | (Cached DOM Look- | |  (Automated QA  |
+   | Event Binding)  | |  up Selectors)    | |  Diagnostics)  |
+   +--------+--------+ +-----------------+ +-----------------+
+            |
+            +-------------+-------------+-------------+
+            |             |             |             |
+            ▼             ▼             ▼             ▼
+   +-----------------+ +---------+ +-----------+ +------------+
+   | js/wayfinding.js| |js/chat.  | |js/sustain-| |js/opera-   |
+   | (Bezier Paths & | |   js    | | ability.js| |  tions.js  |
+   |  Step-free Map) | |(Concier-| | (Carbon   | | (Dashboard |
+   +-----------------+ | ge/Chips| |  Emissions| |  Console & |
+                       +----+----+ | Calculator| |  Simulator)|
+                            |      +-----------+ +------------+
+                            ▼
+                   +-----------------+
+                   | js/ai-engine.js |
+                   | (Intents Classifier
+                   |  & text stream) |
+                   +-----------------+
 ```
 
-### 1. Fan Navigation & Carbon Tracker
-- Interactive SVG nodes allow fans to click or tab-focus points. Selecting a node calculates a custom curved Bezier path matching their routing options (Flat-surface Step-free accessible pathing, low-crowd pathing, or express pathing).
-- The carbon tracker monitors transport, distance, food choice, and waste management parameters to return exact CO2 emission weights and dynamic recommendations.
+---
 
-### 2. Staff Dashboard & Simulator
-- Monitors real-time occupancy, gate queue latency times, and critical incidents.
-- Operations alerts let staff dispatch resolution protocols, invoking the AI tactical engine to render coordinates, briefings, and maps.
+## 📂 Folder Structure
 
-### 3. Automated Diagnostics Suite
-- Evaluates four independent audit modules:
-  1. **Unit & Integration**: Runs 9 comprehensive assertions that call the real functions and validate their return state (Simulator initialization, AI intent mapping keyword checks, Carbon formula accuracy, Wayfinding algorithms, Tab-focus portal switching toggles, simulator Incident dispatch resolution round-trips, dynamic language switcher notices, accessibility preference toggle states, and negative distance boundaries).
-  2. **Accessibility**: Audits landmarks, inputs, focusability index, and duplicate DOM IDs.
-  3. **Security**: Runs sandboxing, storage hygiene, dynamic XSS escaping sweeps, and static scan audits for unescaped template string variables in `.innerHTML` assignments.
-  4. **Performance**: Measures load speeds and rendering complexity density.
+```
+ArenaMind-2026/
+│
+├── .github/                      # GitHub integrations
+│   ├── ISSUE_TEMPLATE/           # Structured issue reporting forms
+│   │   ├── bug_report.md
+│   │   └── feature_request.md
+│   ├── pull_request_template.md  # Quality checklist for PR submissions
+│   └── workflows/
+│       └── ci.yml                # CI automation pipelines
+│
+├── js/                           # JavaScript application modules
+│   ├── accessibility.js          # Speech & text accessibility control overrides
+│   ├── ai-engine.js              # NLP intents parser & metered text streaming
+│   ├── app.js                    # Main page events and views coordinator
+│   ├── chat.js                   # Concierge chip choices & query controller
+│   ├── dom-cache.js              # Centralized DOM elements references map
+│   ├── operations.js             # Staff dashboard and resolved metrics updater
+│   ├── qa-tests.js               # Diagnostics test suite checks definitions
+│   ├── simulator.js              # Incident loads fluctuations emulator
+│   ├── sustainability.js         # Carbon calculator footprint coefficients
+│   └── wayfinding.js             # SVG Bezier maps calculations & route planning
+│
+├── .editorconfig                 # IDE style guidelines configs
+├── CHANGELOG.md                  # Release version updates record log
+├── CONTRIBUTING.md               # Code contribution guides
+├── index.html                    # Layout structure view and CSP metadata
+├── LICENSE                       # MIT License copy
+├── README.md                     # Technical architecture documentation
+├── SECURITY.md                   # Security disclosures policies
+└── style.css                     # Stylings tokens and high-contrast sheets
+```
 
 ---
 
-## 📝 Assumptions Made
+## 📋 Feature Matrix
 
-1. **CORS Protocol Handling**: Since standard file fetching (`fetch()`) is blocked under local `file://` protocols by modern browser security policies, static code scanner checks dynamically fallback to global window object inspections (e.g. checking native signatures of `eval.toString()`) to ensure tests run seamlessly on local files.
-2. **Plaintext Storage Key Signatures**: Assumes standard credential patterns (`auth`, `token`, `password`, `key`) represent leak targets. The scanner validates these signatures and asserts they do not store plaintext values length > 5.
-3. **Escaping Identifiers**: Assumes dynamic variables inside `.innerHTML` should be explicitly wrapped in `escapeHTML()` or checked against a whitelist of static template classes (like `badgeClass`, `badgeLabel`, etc.) to qualify as secure.
+| Portal / Module | Feature | Target Audience | Primary Technical Stack |
+| :--- | :--- | :--- | :--- |
+| **Fan Hub** | Step-free SVG Wayfinding | Accessibility-focused Fans | SVG coordinates parsing, Bezier curve mapping |
+| **Fan Hub** | Multilingual GenAI Assistant | International Spectators | Keyword intent classification (6 languages), delta-time rAF loop text streaming |
+| **Fan Hub** | Carbon footprint calculator | Eco-conscious Spectators | Travel mileage coefficients, dining emissions mapping, recycling offset subtraction |
+| **Staff Console**| Live Occupancy & Gate wait times | Venue managers & Staff | Stadium occupancy counters, gate bottleneck wait times calculations |
+| **Staff Console**| Simulated Incident dispatcher | Venue managers & Staff | Custom browser event dispatching (`stadiumUpdate`) |
+| **Staff Console**| AI Tactical Commander | Venue managers & Staff | Scenario tactical guidelines output streaming |
+| **QA Diagnostics**| Automated Audit Suite | Developers & Auditors | In-browser unit assertions, security checks, accessibility scans |
+
+---
+
+## 🔒 Security Architecture
+
+1. **Content-Security-Policy (CSP)**:
+   - Configured with high-rigor constraints (`default-src 'self'`).
+   - Disables `'unsafe-inline'` styles entirely.
+   - Restricts plugin injections using `object-src 'none'` and frames embedding using `frame-ancestors 'none'`.
+2. **Security Headers Meta Equivalents**:
+   - `Referrer-Policy: no-referrer` prevents leakage of URL structures to third parties.
+   - `X-Frame-Options: DENY` protects the page from Clickjacking frame attacks.
+   - `X-Content-Type-Options: nosniff` forces strict MIME compliance.
+   - `Permissions-Policy` locks down microphone, camera, and geolocation sensors.
+3. **OWASP DOM Protection (Zero-innerHTML)**:
+   - Programmatically builds all dynamic elements using `createElement()` and `.textContent` rather than `.innerHTML` string assignments.
+   - Uses `.replaceChildren()` for secure container clearing.
+4. **Input Length Truncation**:
+   - Chat queries are truncated to a maximum of 200 characters defensively to prevent buffer allocation overheads and Denial of Service (DoS).
+   - Distance mileage parameters are bounded programmatically between 0 and 300 miles.
+
+---
+
+## ♿ Accessibility Guidelines (WCAG 2.2 AA Compliance)
+
+1. **High Contrast Focus**:
+   - High contrast mode forces text colors to `#ffffff` and backgrounds to `#000000` (contrast ratio of $\ge 7:1$), satisfying WCAG 2.2 AAA standards.
+2. **Interactive Elements Access**:
+   - All interactive paths and POI map nodes feature explicit `tabindex="0"` and `role="button"` properties.
+   - Handlers respond dynamically to both `Enter` and `Space` keyboard actions.
+3. **Screen Reader Support**:
+   - Descriptive `aria-label` tags are attached to zoom controls, portal toggles, and language pickers.
+   - An active screen-reader announcer (`#sr-announcer`) with `aria-live="polite"` broadcasts navigation switches, language choices, and wayfinding calculations dynamically.
+4. **Reduced Motion**:
+   - Implements `@media (prefers-reduced-motion: reduce)` to disable transitions and SVG translations for motion-sensitive users.
+
+---
+
+## ⚡ Performance Optimizations
+
+1. **rAF Metered Streams**:
+   - Text writing utilizes `requestAnimationFrame` delta-time tracking to meter out words. This synchronizes operations with screen paint cycles, avoiding layout thrashing.
+2. **Centralized DOM Caching**:
+   - Centralizes all selector cache references in `DOM` to avoid redundant traversals.
+3. **replaceChildren() API**:
+   - Uses `replaceChildren()` rather than `.innerHTML = ""` for DOM clear actions, avoiding HTML parsing cycles.
+
+---
+
+## 🧪 Testing Strategy
+
+1. **Unit & Logic Assertions**:
+   - Validates mathematical carbon estimates (including boundary edge-cases).
+   - Asserts wayfinding coordinate calculations and eta modifiers.
+   - Checks simulator state updates and incident dispatches.
+2. **Accessibility Audits**:
+   - Scans DOM trees for landmark roles (`role="main"`, etc.).
+   - Asserts all form input nodes have an associated `<label for="...">` element.
+   - Audits DOM nodes for unique identifier IDs.
+3. **Security Audits**:
+   - Fetches runtime files dynamically and scans content signatures for forbidden dynamic executors (`eval` and `Function`).
+   - Asserts localStorage contains no plain-text secret variables.
+   - Validates CSP headers presence in the document head.
+
+---
+
+## 🚀 Deployment Guide
+
+1. **Local Access**:
+   - Simply download the project files and open `index.html` in any modern web browser.
+2. **Server Access**:
+   - Deploy the folder containing the project files directly to any static file hosting service (e.g. GitHub Pages, Netlify, Vercel, or AWS S3).
+   - Ensure the server sets standard security headers (`Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`) at the network layer for maximum defense-in-depth.

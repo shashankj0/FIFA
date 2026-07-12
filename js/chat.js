@@ -24,7 +24,10 @@ function submitQuickPrompt(promptText) {
 function handleChatSubmit() {
   if (!DOM.chatTextField || !DOM.chatMessagesBox || !DOM.chatLangSelect || !DOM.chatTextField.value.trim()) return;
   
-  const query = DOM.chatTextField.value;
+  let query = DOM.chatTextField.value.trim();
+  if (query.length > 200) {
+    query = query.substring(0, 200);
+  }
   DOM.chatTextField.value = '';
   
   // Render user bubble

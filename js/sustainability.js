@@ -31,7 +31,7 @@ function calculateCarbonFootprint() {
   const food = foodChoiceEl.value;
   const waste = wasteOffsetEl.value;
   
-  const distance = Math.max(0, parseFloat(distVal) || 0);
+  const distance = Math.min(300, Math.max(0, parseFloat(distVal) || 0));
   
   // Transport coefficients (kg CO2 per mile)
   const transportCoeffs = {
@@ -54,11 +54,18 @@ function calculateCarbonFootprint() {
     basic: 0.5,
     champion: 1.5
   };
+
+  // Defensive input validation mapping
+  if (!Object.prototype.hasOwnProperty.call(transportCoeffs, transport) ||
+      !Object.prototype.hasOwnProperty.call(foodEmissions, food) ||
+      !Object.prototype.hasOwnProperty.call(wasteOffsets, waste)) {
+    return "0.00";
+  }
   
   // CO2 calculation formula
-  const transportTotal = distance * (transportCoeffs[transport] || 0.0);
-  const foodTotal = foodEmissions[food] || 0.0;
-  const wasteTotal = wasteOffsets[waste] || 0.0;
+  const transportTotal = distance * transportCoeffs[transport];
+  const foodTotal = foodEmissions[food];
+  const wasteTotal = wasteOffsets[waste];
   
   const totalCO2 = Math.max(0, transportTotal + foodTotal - wasteTotal);
   
